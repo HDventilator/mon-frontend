@@ -12,7 +12,7 @@ import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
 
-from influx import Influx
+from .influx import Influx
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -102,8 +102,14 @@ app.layout = html.Div(
     className="app_container",
 )
 
-server = app.server
-# production: gunicorn -b 0.0.0.0:8050 app:server
+
+def get_server():
+    """
+    Callable to return Flask server object
+    Use with
+    $ gunicorn -b 0.0.0.0:8050 'app:get_server()'
+    """
+    return app.server
 
 
 @app.callback(
