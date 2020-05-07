@@ -28,8 +28,6 @@ INFLUXDB_DATABASE = os.environ.get("INFLUXDB_DATABASE", "default")
 influx = Influx(INFLUXDB_HOST, INFLUXDB_DATABASE, INFLUXDB_PORT)
 app = dash.Dash(__name__)
 
-server = app.server
-# production: gunicorn -b 0.0.0.0:8050 app:server
 
 # App layout
 app = dash.Dash(__name__)
@@ -103,6 +101,9 @@ app.layout = html.Div(
     ],
     className="app_container",
 )
+
+server = app.server
+# production: gunicorn -b 0.0.0.0:8050 app:server
 
 
 @app.callback(
