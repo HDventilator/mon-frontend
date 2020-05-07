@@ -205,7 +205,3 @@ def live_graphs(data):
     # set layout and return figure
     fig.update_layout(layout)
     return fig
-
-
-if __name__ == "__main__":
-    app.run_server(host="0.0.0.0", port=8050, debug=True)
