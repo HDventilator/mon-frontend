@@ -4,6 +4,8 @@ Main dash app
 # pylint: disable=unused-argument
 import logging
 import os
+from enum import Enum
+from typing import Optional
 
 import dash
 import dash_core_components as dcc
@@ -12,6 +14,14 @@ import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
 
+from .config import (
+    ALARMS_META,
+    BOTTOM_BAR_MEASUREMENTS,
+    MEASUREMENTS_META,
+    PARAMETERS_META,
+    PLOT_MEASUREMENTS,
+    SIDE_BAR_MEASUREMENTS,
+)
 from .influx import Influx
 
 logging.basicConfig(level=logging.INFO)
@@ -112,6 +122,26 @@ def get_server():
     return app.server
 
 
+MetaType = Enum("MetaType", "MEASUREMENT, PARAMETER, ALARM")
+
+
+def get_metainfo(meta_type: MetaType, identifier: str, key: str) -> Optional[str]:
+    """
+    Retrieve metainfo `key` (e.g. "display_name" for the measurement identified
+    by `identifer` (e.g. "dpFLOW")
+    """
+    try:
+        if meta_type == MetaType.MEASUREMENT:
+            return MEASUREMENTS_META[identifier][key]
+        if meta_type == MetaType.PARAMETER:
+            return PARAMETERS_META[identifier][key]
+        if meta_type == MetaType.ALARM:
+            return ALARMS_META[identifier][key]
+    except KeyError:
+        pass
+    return None
+
+
 @app.callback(
     Output("in-memory-storage", "data"), [Input("graph-update", "n_intervals")],
 )
@@ -138,17 +168,20 @@ def live_boxes(data):
     """
     Generates live boxes as children of div 'status-boxes'
     """
-    measurements = list(influx.get_measurements())
-    # for now use all available measurements, instead data.keys?
-
+    measurements = SIDE_BAR_MEASUREMENTS
     children = []
     for msmt in measurements:
+
+        # FIXME: can we be sure this is a measurement?
+        display_name = get_metainfo(MetaType.MEASUREMENT, msmt, "display_name")
+        unit = get_metainfo(MetaType.MEASUREMENT, msmt, "unit")
+
         mean_ = sum(data[msmt]["y"]) / len(data[msmt]["y"])
         max_ = max(data[msmt]["y"])
         children.append(
             html.Div(
                 [
-                    html.H6(f"{msmt.upper()}", className="top_bar_title"),
+                    html.H6(f"{display_name}", className="top_bar_title"),
                     html.H1(f"{data[msmt]['y'][-1]}", className="top_bar_title"),
                     html.H6(
                         f"mean: {mean_:.2f}  max: {max_:.2f}", className="top_bar_title"
@@ -167,7 +200,7 @@ def live_graphs(data):
     """
     Generates live figure with subplots for each measurement
     """
-    measurements = list(influx.get_measurements())
+    measurements = PLOT_MEASUREMENTS
     nrows = len(measurements)
     fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True, vertical_spacing=0.02,)
 
@@ -182,6 +215,11 @@ def live_graphs(data):
 
     # add traces and setup axes for each measurement
     for n, measurement in enumerate(measurements):
+
+        # FIXME: can we be sure this is a measurement?
+        display_name = get_metainfo(MetaType.MEASUREMENT, measurement, "display_name")
+        unit = get_metainfo(MetaType.MEASUREMENT, measurement, "unit")
+
         trace = go.Scatter(
             x=data[measurement]["x"],
             y=data[measurement]["y"],
@@ -192,7 +230,7 @@ def live_graphs(data):
         fig.add_trace(trace, row=n + 1, col=1)
 
         y_layout = dict(
-            title=f"{measurement.upper()} [-]",
+            title=f"{display_name.upper()} [{unit}]",
             color="#fff",
             range=[min(data[measurement]["y"]), max(data[measurement]["y"])],
             showgrid=False,

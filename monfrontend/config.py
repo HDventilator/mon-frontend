@@ -23,6 +23,7 @@ Notes:
      - min/max values for user setting parameters and alarm limits: how to store
        permanently (in influx?)
      - config validation (type check)?
+     - does the sidebar only show measurements, and the bottom bar only parameters?!
 """
 
 ##################
