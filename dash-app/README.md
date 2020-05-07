@@ -1,3 +1,0 @@
-# mon-frontend
-
-## FIXME
