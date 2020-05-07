@@ -10,6 +10,4 @@ COPY ./* /app/
 
 EXPOSE 8050
 
-
-
-ENTRYPOINT ["python", "app.py"]
+CMD ["python", "app.py"]

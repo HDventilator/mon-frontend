@@ -1,9 +1,10 @@
 [MASTER]
 
 [BASIC]
-good-names=logger,app,n,i
+good-names=logger,app,n,i,e
 
 [MESSAGES CONTROL]
+disable=bad-continuation
 
 [FORMAT]
 

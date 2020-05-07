@@ -7,7 +7,7 @@ services:
     environment:
       - INFLUXDB_HOST=influxdb
       - INFLUXDB_PORT=8086
-      - WRITE_INTERVAL=1.0
+      - WRITE_INTERVAL=200
     volumes:
       - ./testdata-writer:/app
 
@@ -15,6 +15,12 @@ services:
     container_name: dash-app
     build:
       context: dash-app
+    environment:
+      - INFLUXDB_HOST=influxdb
+      - INFLUXDB_PORT=8086
+      - INFLUXDB_DATABASE=testdata
+      - GRAPH_UPDATE_INTERVAL_SECONDS=1.0
+      - LOGLEVEL=DEBUG
     volumes:
       - ./dash-app:/app
     ports:
