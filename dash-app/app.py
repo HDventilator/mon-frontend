@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(os.environ.get("LOGLEVEL", "INFO"))
 
 
-INFLUXDB_HOST = os.environ.get("INFLUXDB_HOST", "influxdb")
+INFLUXDB_HOST = os.environ.get("INFLUXDB_HOST", "localhost")
 INFLUXDB_PORT = int(os.environ.get("INFLUXDB_PORT", 8086))
 UPDATE_INTERVAL = float(os.environ.get("GRAPH_UPDATE_INTERVAL_SECONDS", 1))
 INFLUXDB_DATABASE = os.environ.get("INFLUXDB_DATABASE", "default")
