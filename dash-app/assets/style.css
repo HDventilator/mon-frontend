@@ -4,8 +4,6 @@ body {
     background-color: #000;
 }
 
-
-
 .app_container {
 	height: 100vh;
 }
@@ -20,33 +18,62 @@ body {
 
 .top_bar {
     color: #fff;
-	height: 10vh;
+	height: 50px;
 	border-style: none;
 	border-color: #fff;
 }
 
+.top_bar_info {
+    float: right;
+}
+
+.top_bar_text {
+    float: right;
+	margin-right: 10px;
+}
+
+.top_bar_logo {
+    float: right;
+	margin-left: 0px;
+	margin-right: 0px;
+	margin-top: 0px;
+	margin-bottom: 0px;
+}
+
+.top_bar_img {
+    height: 40px;
+    width: auto;
+}
+
 .main_display {
     color: #fff;
-	height: 80vh;
+	height: calc(100vh - 100px);
 	display: inline;
+	border-style: solid;
+	border-color: #fff;
+	border-width: 2px;
 }
 
-.live-plots {
+.live_plots {
 	color: #fff;
-  height:100%;
-  width:100%;
+	height:100%;
+	width:100%;
+  	border-style: dashed;
+	border-color: #fff;
 }
 
-.live-plot {
-  height: 100%;
-  width: 100%;
-  color: #fff;
+.live_plot {
+	height: 100%;
+	width: 100%;
+	color: #fff;
  }
 
 .status_boxes{
-  height:100%;
-  display:flex;
-  flex-direction:column;
+	height:100%;
+	display:flex;
+	flex-direction:column;
+	border-style: dashed;
+	border-color: #fff;
 }
 
 .status_box{
@@ -56,9 +83,9 @@ body {
 }
 
 .bottom_bar {
-	height: 10vh;
-	color; #fff;
-	border-style: none;
+	height: 50px;
+	color: #fff;
+	border-style: dashed;
 	border-color: #fff;
 }
 

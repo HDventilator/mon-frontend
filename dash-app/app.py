@@ -41,12 +41,27 @@ app.layout = html.Div(
                 html.Div(
                     [
                         html.Div(
-                            [html.H4("MODE", className="top_bar_title"),],
+                            [html.H1("VENT MODE", className="top_bar_title"),],
                             className="one-third column top_bar_mode",
                         ),
                         html.Div(
-                            [html.H4("HDvent", className="top_bar_title"),],
-                            className="two-thirds column top_bar_info",
+                            [
+                                html.Div(
+                                    [
+                                        html.Img(
+                                            src=app.get_asset_url("HDvent-logo.png"),
+                                            className="top_bar_img",
+                                        )
+                                    ],
+                                    className="top_bar_logo",
+                                ),                                
+                                html.Div(
+                        
+                                    [html.H2("HDvent Documentation Information", className="top_bar_text"),],
+                                    className="top_bar_info",
+                                ),
+                            ],
+                            className="two-thirds column top_bar_info",               
                         ),
                     ],
                     className="top_bar",
@@ -61,7 +76,7 @@ app.layout = html.Div(
                                     [
                                         dcc.Graph(
                                             id="live-graphs",
-                                            style={"height": "80vh"},
+                                            style={"height": "calc(100vh - 100px)",},
                                             animate=False,
                                         ),
                                     ],
@@ -86,11 +101,17 @@ app.layout = html.Div(
                 html.Div(
                     [
                         html.Div(
-                            [html.H4("MACHINE PARAMETERS", className="top_bar_title"),],
+                            [
+                                # empty, to be filled when we get data
+                            ],
+                            id="machine-parameters",
                             className="two-thirds column machine_parameters",
                         ),
                         html.Div(
-                            [html.H4("MACHINE STATUS", className="top_bar_title"),],
+                            [
+                                # empty, to be filled when we get data
+                            ],
+                            id="machine-status",
                             className="one-third column machine_status",
                         ),
                     ],
@@ -123,6 +144,43 @@ def fetch_data(intervals):
         }
     return measurements_data
 
+@app.callback(
+    Output("machine-status", "children"), [Input("in-memory-storage", "data"),],
+)
+def live_status(data):
+    """
+    Generates live machine parameters as children of div 'machine-parameters'
+    """
+    measurements = list(influx.get_measurements())
+    # for now use all available measurements, instead data.keys?
+
+    children = []
+    for msmt in measurements:
+        children.append(
+            html.H6(f"MachineStatus:{1}", className="motor_status"),
+        )
+    return children
+
+@app.callback(
+    Output("machine-parameters", "children"), [Input("in-memory-storage", "data"),],
+)
+def live_machine(data):
+    """
+    Generates live machine parameters as children of div 'machine-parameters'
+    """
+    measurements = list(influx.get_measurements())
+    # for now use all available measurements, instead data.keys?
+
+    children = []
+    for msmt in measurements:
+        children.append(
+            html.H6(f"Motor Status:{1}", className="motor_status"),
+            html.H6(f"Power Supply Load:{1}", className="psv_load"),
+            html.H6(f"Optical Switch:{1}", className="optical switch"),
+            html.H6(f"Warnings:{1}", className="warnings"),  
+            html.H6(f"Arm Position:{1}", className="arm_position"),  
+        )
+    return children
 
 @app.callback(
     Output("status-boxes", "children"), [Input("in-memory-storage", "data"),],
@@ -168,6 +226,13 @@ def live_graphs(data):
     layout = dict(
         paper_bgcolor="#000",
         plot_bgcolor="#000",
+        margin=go.Margin(
+            l=0,
+            r=0,
+            b=0,
+            t=0,
+            pad=0
+        ),
         # colorway=["#fff"],
         xaxis3=dict(title="relative time [s]", color="#fff"),
         showlegend=False,
@@ -201,4 +266,4 @@ def live_graphs(data):
 
 
 if __name__ == "__main__":
-    app.run_server(host="0.0.0.0", port=8050, debug=True)
+    app.run_server(host="127.0.0.1", port=8050, debug=True)
