@@ -39,11 +39,30 @@ app.layout = html.Div(
                 html.Div(
                     [
                         html.Div(
-                            [html.H4("MODE", className="top_bar_title"),],
+                            [html.H1("VENT MODE", className="top_bar_title"),],
                             className="one-third column top_bar_mode",
                         ),
                         html.Div(
-                            [html.H4("HDvent", className="top_bar_title"),],
+                            [
+                                html.Div(
+                                    [
+                                        html.Img(
+                                            src=app.get_asset_url("HDvent-logo.png"),
+                                            className="top_bar_img",
+                                        )
+                                    ],
+                                    className="top_bar_logo",
+                                ),
+                                html.Div(
+                                    [
+                                        html.H2(
+                                            "HDvent Documentation Information",
+                                            className="top_bar_text",
+                                        ),
+                                    ],
+                                    className="top_bar_info",
+                                ),
+                            ],
                             className="two-thirds column top_bar_info",
                         ),
                     ],
@@ -59,7 +78,7 @@ app.layout = html.Div(
                                     [
                                         dcc.Graph(
                                             id="live-graphs",
-                                            style={"height": "80vh"},
+                                            style={"height": "calc(100vh - 100px)",},
                                             animate=False,
                                         ),
                                     ],
@@ -87,11 +106,17 @@ app.layout = html.Div(
                 html.Div(
                     [
                         html.Div(
-                            [html.H4("MACHINE PARAMETERS", className="top_bar_title"),],
+                            [
+                                # empty, to be filled when we get data
+                            ],
+                            id="machine-parameters",
                             className="two-thirds column machine_parameters",
                         ),
                         html.Div(
-                            [html.H4("MACHINE STATUS", className="top_bar_title"),],
+                            [
+                                # empty, to be filled when we get data
+                            ],
+                            id="machine-status",
                             className="one-third column machine_status",
                         ),
                     ],
@@ -134,6 +159,41 @@ def fetch_data(intervals):
     return measurements_data
 
 
+# Display live machine status on the right of the bottom bar (if this functionality is needed)
+@app.callback(
+    Output("machine-status", "children"), [Input("in-memory-storage", "data"),],
+)
+def live_status(data):
+    """
+    Generates live machine status as child of div 'machine-parameters'
+    """
+    # Fetch machine status instead
+    machine_status = [1]
+    # for now status is an int
+    children = []
+    for _ in machine_status:
+        children.append(html.H6(f"MachineStatus:{1}", className="motor_status"),)
+    return children
+
+
+# callback to display multiple live machine parameters in the left of the bottom bar
+@app.callback(
+    Output("machine-parameters", "children"), [Input("in-memory-storage", "data"),],
+)
+def live_machine(data):
+    """
+    Generates live machine parameters as children of div 'machine-parameters'
+    """
+    # Fetch list of machine parameters instead
+    machine_parameters = [3.7]
+    # for now use only one list element
+
+    children = []
+    for _ in machine_parameters:
+        children.append(html.H5(f"Motor Status:{1}", className="motor_status"),)
+    return children
+
+
 @app.callback(
     Output("status-boxes", "children"), [Input("in-memory-storage", "data"),],
 )
@@ -151,9 +211,9 @@ def live_boxes(data):
         children.append(
             html.Div(
                 [
-                    html.H6(f"{msmt.upper()}", className="top_bar_title"),
-                    html.H1(f"{data[msmt]['y'][-1]}", className="top_bar_title"),
-                    html.H6(
+                    html.H4(f"{msmt.upper()}", className="top_bar_title"),
+                    html.H3(f"{data[msmt]['y'][-1]}", className="top_bar_title"),
+                    html.H4(
                         f"mean: {mean_:.2f}  max: {max_:.2f}", className="top_bar_title"
                     ),
                 ],
@@ -181,6 +241,7 @@ def live_graphs(data):
     layout = dict(
         paper_bgcolor="#000",
         plot_bgcolor="#000",
+        margin=dict(l=0, r=0, b=0, t=0, pad=0),
         # colorway=["#fff"],
         xaxis3=dict(title="relative time [s]", color="#fff"),
         showlegend=False,
