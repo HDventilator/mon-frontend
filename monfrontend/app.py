@@ -2,7 +2,6 @@
 Main dash app
 """
 # pylint: disable=unused-argument
-import logging
 import os
 
 import dash
@@ -13,11 +12,6 @@ from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
 
 from .influx import Influx
-
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-logger.setLevel(os.environ.get("LOGLEVEL", "INFO"))
-
 
 INFLUXDB_HOST = os.environ.get("INFLUXDB_HOST", "localhost")
 INFLUXDB_PORT = int(os.environ.get("INFLUXDB_PORT", 8086))
