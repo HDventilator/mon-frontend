@@ -154,23 +154,26 @@ def fetch_data(intervals):
         }
     return measurements_data
 
+# Display live machine status on the right of the bottom bar (if this functionality is needed)
 @app.callback(
     Output("machine-status", "children"), [Input("in-memory-storage", "data"),],
 )
 def live_status(data):
     """
-    Generates live machine parameters as children of div 'machine-parameters'
+    Generates live machine status as child of div 'machine-parameters'
     """
-    measurements = list(influx.get_measurements())
-    # for now use all available measurements, instead data.keys?
-
+    # Fetch machine status instead
+    machineStatus = [1]
+    # for now status is an int
     children = []
-    for msmt in measurements:
+    for mS in machineStatus:
         children.append(
             html.H6(f"MachineStatus:{1}", className="motor_status"),
         )
     return children
 
+
+# callback to display multiple live machine parameters in the left of the bottom bar
 @app.callback(
     Output("machine-parameters", "children"), [Input("in-memory-storage", "data"),],
 )
@@ -178,17 +181,14 @@ def live_machine(data):
     """
     Generates live machine parameters as children of div 'machine-parameters'
     """
-    measurements = list(influx.get_measurements())
-    # for now use all available measurements, instead data.keys?
+    # Fetch list of machine parameters instead
+    listOfMachineParameters = [3.7]
+    # for now use only one list element
 
     children = []
-    for msmt in measurements:
+    for lOMP in listOfMachineParameters:
         children.append(
             html.H5(f"Motor Status:{1}", className="motor_status"),
-            html.H5(f"Power Supply Load:{1}", className="psv_load"),
-            html.H5(f"Optical Switch:{1}", className="optical switch"),
-            html.H5(f"Warnings:{1}", className="warnings"),  
-            html.H5(f"Arm Position:{1}", className="arm_position"),  
         )
     return children
 
