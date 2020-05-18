@@ -108,13 +108,10 @@ def live_status(data):
     """
     Generates 'machine-status' component
     """
-    # Fetch machine status instead
-    machine_status = [1]
-    # for now status is an int
-    children = []
-    for _ in machine_status:
-        children.append(html.H6(f"MachineStatus:{1}", className="motor_status"),)
-    return children
+    # Fetch machine status from influx here
+
+    machine_status = 1
+    return [html.H6(f"Status: {machine_status}")]
 
 
 # callback to display multiple live machine parameters in the left of the bottom bar
