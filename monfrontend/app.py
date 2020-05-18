@@ -122,11 +122,11 @@ def fetch_data(intervals):
     """
     measurements_data = {}
     for measurement in influx.get_measurements():
-        data = list(influx.get_data(measurement, duration="30s"))
+        data = list(influx.get_data(measurement, duration="30s", groupby_time="100ms"))
 
         measurements_data[measurement] = {
             "x": [d["time"] for d in data],
-            "y": [d["value"] for d in data],
+            "y": [d["mean_value"] for d in data],
         }
     return measurements_data
 
