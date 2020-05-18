@@ -20,7 +20,7 @@ INFLUXDB_PORT=8086
 # influxdb database name
 INFLUXDB_DATABASE=default
 # data update interval in seconds
-UPDATE_INTERVAL=1.0
+GRAPH_UPDATE_INTERVAL_SECONDS=1.0
 ```
 
 ### UI Configuration
