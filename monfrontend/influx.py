@@ -6,12 +6,11 @@ Todos:
 """
 # pylint: disable=bad-continuation
 
-import os
 import logging
 import copy
-from datetime import datetime, timezone
-
-from typing import Optional, Iterable, Dict
+import os
+import time
+from typing import Dict, Iterable, Optional
 
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
@@ -22,35 +21,13 @@ logger.setLevel(os.environ.get("LOGLEVEL", "INFO"))
 
 def _convert_timestr(datapt):
     """
-    Convert the `time` value of the given influx data point from a timestamp
-    string to a python datetime object with timezone information.
+    Convert the `time` value of the given influx data point from an absolute timestamp
+    in nanoseconds to relative (to now()) time
     """
-    time_string = datapt["time"]
-    if "." not in time_string:
-        influx_ts_format = "%Y-%m-%dT%H:%M:%SZ"
-    else:
-        influx_ts_format = "%Y-%m-%dT%H:%M:%S.%fZ"
-
     datapt_mod = copy.copy(datapt)
-    try:
-        timestamp = datetime.strptime(datapt["time"], influx_ts_format)
-    except KeyError:
-        # no time field in datapt
-        pass
-    except ValueError:
-        # error parsing, return as is
-        logger.warning(
-            "Error converting string timestamp to datetime, passing on as-is."
-        )
-        return datapt
-
-    # add UTC timezone information
-    datapt_mod["time"] = timestamp.astimezone(timezone.utc)
-
-    # replace y-data with relative time
-    now = datetime.now(timezone.utc)
-    datapt_mod["time"] = (datapt_mod["time"] - now).total_seconds()
-
+    # replace timestamp with relative time in seconds
+    now = time.time_ns()
+    datapt_mod["time"] = (datapt_mod["time"] - now) / 1_000_000_000
     return datapt_mod
 
 
@@ -102,5 +79,5 @@ class Influx:
         query_str = f"SELECT {fields} FROM {measurement} WHERE time > now()-{duration}"
         # logger.debug("query: %s", query_str)
         client = self._get_client()
-        query_result = client.query(query_str)
+        query_result = client.query(query_str, epoch="ns")
         yield from map(_convert_timestr, query_result.get_points())
