@@ -120,15 +120,43 @@ def live_status(data):
 )
 def live_machine(data):
     """
-    Generates components of 'machine-parameters'
+    Generates components for the 'bottom-bar'
     """
-    # Fetch list of machine parameters instead
-    machine_parameters = [3.7]
-    # for now use only one list element
+    measurements = list(influx.get_measurements())
+    # for now use all available measurements, instead data.keys?
 
     children = []
-    for _ in machine_parameters:
-        children.append(html.H5(f"Motor Status:{1}", className="motor_status"),)
+
+    layout = dict(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=0, r=0, b=0, t=0, pad=5),
+        showlegend=False,
+        font={"color": "white"},
+    )
+
+    for msmt in measurements:
+        fig = go.Figure(
+            go.Indicator(
+                mode="gauge+number",
+                value=data[msmt]["y"][-1],
+                domain={"x": [0.2, 0.8], "y": [0, 0.8]},
+                title=f"{msmt.upper()}",
+                gauge={
+                    "axis": {"tickwidth": 1, "tickcolor": "darkblue",},
+                    "bar": {"color": "darkblue"},
+                    "bgcolor": "white",
+                    "borderwidth": 2,
+                    "bordercolor": "gray",
+                },
+            )
+        )
+        fig.update_layout(layout)
+
+        children.append(
+            dcc.Graph(figure=fig, config={"displayModeBar": False}, className="gauge")
+        )
+
     return children
 
 
