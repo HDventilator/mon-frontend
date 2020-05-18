@@ -52,14 +52,18 @@ app.layout = html.Div(
                                         )
                                     ],
                                     className="top_bar_logo",
-                                ),                                
+                                ),
                                 html.Div(
-                        
-                                    [html.H2("HDvent Documentation Information", className="top_bar_text"),],
+                                    [
+                                        html.H2(
+                                            "HDvent Documentation Information",
+                                            className="top_bar_text",
+                                        ),
+                                    ],
                                     className="top_bar_info",
                                 ),
                             ],
-                            className="two-thirds column top_bar_info",               
+                            className="two-thirds column top_bar_info",
                         ),
                     ],
                     className="top_bar",
@@ -154,6 +158,7 @@ def fetch_data(intervals):
         }
     return measurements_data
 
+
 # Display live machine status on the right of the bottom bar (if this functionality is needed)
 @app.callback(
     Output("machine-status", "children"), [Input("in-memory-storage", "data"),],
@@ -163,13 +168,11 @@ def live_status(data):
     Generates live machine status as child of div 'machine-parameters'
     """
     # Fetch machine status instead
-    machineStatus = [1]
+    machine_status = [1]
     # for now status is an int
     children = []
-    for mS in machineStatus:
-        children.append(
-            html.H6(f"MachineStatus:{1}", className="motor_status"),
-        )
+    for _ in machine_status:
+        children.append(html.H6(f"MachineStatus:{1}", className="motor_status"),)
     return children
 
 
@@ -182,15 +185,14 @@ def live_machine(data):
     Generates live machine parameters as children of div 'machine-parameters'
     """
     # Fetch list of machine parameters instead
-    listOfMachineParameters = [3.7]
+    machine_parameters = [3.7]
     # for now use only one list element
 
     children = []
-    for lOMP in listOfMachineParameters:
-        children.append(
-            html.H5(f"Motor Status:{1}", className="motor_status"),
-        )
+    for _ in machine_parameters:
+        children.append(html.H5(f"Motor Status:{1}", className="motor_status"),)
     return children
+
 
 @app.callback(
     Output("status-boxes", "children"), [Input("in-memory-storage", "data"),],
@@ -239,13 +241,7 @@ def live_graphs(data):
     layout = dict(
         paper_bgcolor="#000",
         plot_bgcolor="#000",
-        margin=go.Margin(
-            l=0,
-            r=0,
-            b=0,
-            t=0,
-            pad=0
-        ),
+        margin=dict(l=0, r=0, b=0, t=0, pad=0),
         # colorway=["#fff"],
         xaxis3=dict(title="relative time [s]", color="#fff"),
         showlegend=False,
