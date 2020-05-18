@@ -28,102 +28,43 @@ INFLUXDB_DATABASE = os.environ.get("INFLUXDB_DATABASE", "default")
 influx = Influx(INFLUXDB_HOST, INFLUXDB_DATABASE, INFLUXDB_PORT)
 app = dash.Dash(__name__)
 
-
 # App layout
-app = dash.Dash(__name__)
 app.layout = html.Div(
     [
+        # Top Bar
+        html.Div([html.H2("VENT MODE", className="mode_box")],),
         html.Div(
             [
-                ## Top Bar
-                html.Div(
-                    [
-                        html.Div(
-                            [html.H1("VENT MODE", className="top_bar_title"),],
-                            className="one-third column top_bar_mode",
-                        ),
-                        html.Div(
-                            [
-                                html.Div(
-                                    [
-                                        html.Img(
-                                            src=app.get_asset_url("HDvent-logo.png"),
-                                            className="top_bar_img",
-                                        )
-                                    ],
-                                    className="top_bar_logo",
-                                ),
-                                html.Div(
-                                    [
-                                        html.H2(
-                                            "HDvent Documentation Information",
-                                            className="top_bar_text",
-                                        ),
-                                    ],
-                                    className="top_bar_info",
-                                ),
-                            ],
-                            className="two-thirds column top_bar_info",
-                        ),
-                    ],
-                    className="top_bar",
-                ),
-                ## Main Display Area
-                html.Div(
-                    [
-                        # Live Plots
-                        html.Div(
-                            [
-                                html.Div(
-                                    [
-                                        dcc.Graph(
-                                            id="live-graphs",
-                                            style={"height": "calc(100vh - 100px)",},
-                                            animate=False,
-                                        ),
-                                    ],
-                                    className="live_plot",
-                                ),
-                                dcc.Interval(
-                                    id="graph-update",
-                                    interval=int(float(UPDATE_INTERVAL) * 1000),
-                                ),
-                            ],
-                            className="two-thirds column live_plots",
-                        ),
-                        # Status Boxes
-                        html.Div(
-                            [
-                                # empty, to be filled when we get data
-                            ],
-                            id="status-boxes",
-                            className="one-third column status_boxes",
-                        ),
-                    ],
-                    className="main_display",
-                ),
-                ## Bottom Bar
-                html.Div(
-                    [
-                        html.Div(
-                            [
-                                # empty, to be filled when we get data
-                            ],
-                            id="machine-parameters",
-                            className="two-thirds column machine_parameters",
-                        ),
-                        html.Div(
-                            [
-                                # empty, to be filled when we get data
-                            ],
-                            id="machine-status",
-                            className="one-third column machine_status",
-                        ),
-                    ],
-                    className="bottom_bar",
+                html.H3("HDvent"),
+                html.Img(
+                    src=app.get_asset_url("HDvent-logo.png"), className="top_bar_img",
                 ),
             ],
-            className="app_content",
+            className="top_bar",
+        ),
+        # Live Plots
+        html.Div(
+            [
+                dcc.Graph(
+                    id="live-graphs",
+                    animate=False,
+                    responsive=True,
+                    config={"displayModeBar": False},
+                    style=dict(height="100%", width="100%"),
+                ),
+            ],
+            className="main_display",
+        ),
+        # Sidebar
+        html.Div([], id="side-bar", className="side_bar",),
+        # Bottom bar
+        html.Div([], id="bottom-bar", className="bottom_bar",),
+        # Bottom info box
+        html.Div([], id="machine-status", className="info_box",),
+        dcc.Interval(
+            id="graph-update",
+            interval=int(float(UPDATE_INTERVAL) * 1000),
+            # disabled=True,
         ),
         dcc.Store(id="in-memory-storage", storage_type="memory"),
     ],
@@ -165,7 +106,7 @@ def fetch_data(intervals):
 )
 def live_status(data):
     """
-    Generates live machine status as child of div 'machine-parameters'
+    Generates 'machine-status' component
     """
     # Fetch machine status instead
     machine_status = [1]
@@ -178,11 +119,11 @@ def live_status(data):
 
 # callback to display multiple live machine parameters in the left of the bottom bar
 @app.callback(
-    Output("machine-parameters", "children"), [Input("in-memory-storage", "data"),],
+    Output("bottom-bar", "children"), [Input("in-memory-storage", "data"),],
 )
 def live_machine(data):
     """
-    Generates live machine parameters as children of div 'machine-parameters'
+    Generates components of 'machine-parameters'
     """
     # Fetch list of machine parameters instead
     machine_parameters = [3.7]
@@ -195,11 +136,11 @@ def live_machine(data):
 
 
 @app.callback(
-    Output("status-boxes", "children"), [Input("in-memory-storage", "data"),],
+    Output("side-bar", "children"), [Input("in-memory-storage", "data"),],
 )
 def live_boxes(data):
     """
-    Generates live boxes as children of div 'status-boxes'
+    Generates components for the 'side-bar'
     """
     measurements = list(influx.get_measurements())
     # for now use all available measurements, instead data.keys?
