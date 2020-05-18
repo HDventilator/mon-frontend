@@ -21,7 +21,7 @@ logger.setLevel(os.environ.get("LOGLEVEL", "INFO"))
 
 INFLUXDB_HOST = os.environ.get("INFLUXDB_HOST", "localhost")
 INFLUXDB_PORT = int(os.environ.get("INFLUXDB_PORT", 8086))
-UPDATE_INTERVAL = float(os.environ.get("GRAPH_UPDATE_INTERVAL_SECONDS", 1))
+UPDATE_INTERVAL = float(os.environ.get("GRAPH_UPDATE_INTERVAL_SECONDS", "1"))
 INFLUXDB_DATABASE = os.environ.get("INFLUXDB_DATABASE", "default")
 
 
@@ -65,7 +65,10 @@ app.layout = html.Div(
                                     ],
                                     className="live_plot",
                                 ),
-                                dcc.Interval(id="graph-update", interval=1 * 1000),
+                                dcc.Interval(
+                                    id="graph-update",
+                                    interval=int(float(UPDATE_INTERVAL) * 1000),
+                                ),
                             ],
                             className="two-thirds column live_plots",
                         ),
@@ -122,11 +125,11 @@ def fetch_data(intervals):
     """
     measurements_data = {}
     for measurement in influx.get_measurements():
-        data = list(influx.get_data(measurement, duration="30s"))
+        data = list(influx.get_data(measurement, duration="30s", groupby_time="100ms"))
 
         measurements_data[measurement] = {
             "x": [d["time"] for d in data],
-            "y": [d["value"] for d in data],
+            "y": [d["mean_value"] for d in data],
         }
     return measurements_data
 
@@ -168,7 +171,10 @@ def live_graphs(data):
     Generates live figure with subplots for each measurement
     """
     measurements = list(influx.get_measurements())
-    nrows = len(measurements)
+    if not measurements:
+        print("no measurements found in influxdb!")
+
+    nrows = max(1, len(measurements))
     fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True, vertical_spacing=0.02,)
 
     # overall layout
