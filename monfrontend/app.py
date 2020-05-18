@@ -176,15 +176,23 @@ def live_graphs(data):
         print("no measurements found in influxdb!")
 
     nrows = max(1, len(measurements))
-    fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True, vertical_spacing=0.02,)
+    fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True, vertical_spacing=0.05)
 
     # overall layout
     layout = dict(
-        paper_bgcolor="#000",
-        plot_bgcolor="#000",
-        margin=dict(l=0, r=0, b=0, t=0, pad=0),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
         # colorway=["#fff"],
-        xaxis3=dict(title="relative time [s]", color="#fff"),
+        margin=dict(l=10, r=10, b=10, t=10, pad=0),
+        xaxis=dict(zeroline=False, showgrid=False),
+        xaxis2=dict(zeroline=False, showgrid=False),
+        xaxis3=dict(
+            title="TIME [s]",
+            color="#fff",
+            showgrid=False,
+            zeroline=False,
+            range=[-30, 0],  # 30 seconds in the past
+        ),
         showlegend=False,
     )
 
@@ -204,12 +212,13 @@ def live_graphs(data):
             color="#fff",
             range=[min(data[measurement]["y"]), max(data[measurement]["y"])],
             showgrid=False,
+            zeroline=False,
+            showline=False,
         )
         if n == 0:
             layout["yaxis"] = y_layout
         else:
             layout[f"yaxis{n+1}"] = y_layout
-
     # set layout and return figure
     fig.update_layout(layout)
     return fig
