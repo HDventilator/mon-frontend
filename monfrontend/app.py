@@ -2,7 +2,6 @@
 Main dash app
 """
 # pylint: disable=unused-argument
-import logging
 import os
 
 import dash
@@ -14,11 +13,6 @@ from plotly.subplots import make_subplots
 
 from .influx import Influx
 
-logging.basicConfig(level=logging.INFO)
-logger = logging.getLogger(__name__)
-logger.setLevel(os.environ.get("LOGLEVEL", "INFO"))
-
-
 INFLUXDB_HOST = os.environ.get("INFLUXDB_HOST", "localhost")
 INFLUXDB_PORT = int(os.environ.get("INFLUXDB_PORT", 8086))
 UPDATE_INTERVAL = float(os.environ.get("GRAPH_UPDATE_INTERVAL_SECONDS", "1"))
@@ -28,102 +22,43 @@ INFLUXDB_DATABASE = os.environ.get("INFLUXDB_DATABASE", "default")
 influx = Influx(INFLUXDB_HOST, INFLUXDB_DATABASE, INFLUXDB_PORT)
 app = dash.Dash(__name__)
 
-
 # App layout
-app = dash.Dash(__name__)
 app.layout = html.Div(
     [
+        # Top Bar
+        html.Div([html.H2("VENT MODE", className="mode_box")],),
         html.Div(
             [
-                ## Top Bar
-                html.Div(
-                    [
-                        html.Div(
-                            [html.H1("VENT MODE", className="top_bar_title"),],
-                            className="one-third column top_bar_mode",
-                        ),
-                        html.Div(
-                            [
-                                html.Div(
-                                    [
-                                        html.Img(
-                                            src=app.get_asset_url("HDvent-logo.png"),
-                                            className="top_bar_img",
-                                        )
-                                    ],
-                                    className="top_bar_logo",
-                                ),
-                                html.Div(
-                                    [
-                                        html.H2(
-                                            "HDvent Documentation Information",
-                                            className="top_bar_text",
-                                        ),
-                                    ],
-                                    className="top_bar_info",
-                                ),
-                            ],
-                            className="two-thirds column top_bar_info",
-                        ),
-                    ],
-                    className="top_bar",
-                ),
-                ## Main Display Area
-                html.Div(
-                    [
-                        # Live Plots
-                        html.Div(
-                            [
-                                html.Div(
-                                    [
-                                        dcc.Graph(
-                                            id="live-graphs",
-                                            style={"height": "calc(100vh - 100px)",},
-                                            animate=False,
-                                        ),
-                                    ],
-                                    className="live_plot",
-                                ),
-                                dcc.Interval(
-                                    id="graph-update",
-                                    interval=int(float(UPDATE_INTERVAL) * 1000),
-                                ),
-                            ],
-                            className="two-thirds column live_plots",
-                        ),
-                        # Status Boxes
-                        html.Div(
-                            [
-                                # empty, to be filled when we get data
-                            ],
-                            id="status-boxes",
-                            className="one-third column status_boxes",
-                        ),
-                    ],
-                    className="main_display",
-                ),
-                ## Bottom Bar
-                html.Div(
-                    [
-                        html.Div(
-                            [
-                                # empty, to be filled when we get data
-                            ],
-                            id="machine-parameters",
-                            className="two-thirds column machine_parameters",
-                        ),
-                        html.Div(
-                            [
-                                # empty, to be filled when we get data
-                            ],
-                            id="machine-status",
-                            className="one-third column machine_status",
-                        ),
-                    ],
-                    className="bottom_bar",
+                html.H3("HDvent"),
+                html.Img(
+                    src=app.get_asset_url("HDvent-logo.png"), className="top_bar_img",
                 ),
             ],
-            className="app_content",
+            className="top_bar",
+        ),
+        # Live Plots
+        html.Div(
+            [
+                dcc.Graph(
+                    id="live-graphs",
+                    animate=False,
+                    responsive=True,
+                    config={"displayModeBar": False},
+                    style=dict(height="100%", width="100%"),
+                ),
+            ],
+            className="main_display",
+        ),
+        # Sidebar
+        html.Div([], id="side-bar", className="side_bar",),
+        # Bottom bar
+        html.Div([], id="bottom-bar", className="bottom_bar",),
+        # Bottom info box
+        html.Div([], id="machine-status", className="info_box",),
+        dcc.Interval(
+            id="graph-update",
+            interval=int(float(UPDATE_INTERVAL) * 1000),
+            # disabled=True,
         ),
         dcc.Store(id="in-memory-storage", storage_type="memory"),
     ],
@@ -165,41 +100,66 @@ def fetch_data(intervals):
 )
 def live_status(data):
     """
-    Generates live machine status as child of div 'machine-parameters'
+    Generates 'machine-status' component
     """
-    # Fetch machine status instead
-    machine_status = [1]
-    # for now status is an int
-    children = []
-    for _ in machine_status:
-        children.append(html.H6(f"MachineStatus:{1}", className="motor_status"),)
-    return children
+    # Fetch machine status from influx here
+
+    machine_status = 1
+    return [html.H6(f"Status: {machine_status}")]
 
 
 # callback to display multiple live machine parameters in the left of the bottom bar
 @app.callback(
-    Output("machine-parameters", "children"), [Input("in-memory-storage", "data"),],
+    Output("bottom-bar", "children"), [Input("in-memory-storage", "data"),],
 )
 def live_machine(data):
     """
-    Generates live machine parameters as children of div 'machine-parameters'
+    Generates components for the 'bottom-bar'
     """
-    # Fetch list of machine parameters instead
-    machine_parameters = [3.7]
-    # for now use only one list element
+    measurements = list(influx.get_measurements())
+    # for now use all available measurements, instead data.keys?
 
     children = []
-    for _ in machine_parameters:
-        children.append(html.H5(f"Motor Status:{1}", className="motor_status"),)
+
+    layout = dict(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=0, r=0, b=0, t=0, pad=5),
+        showlegend=False,
+        font={"color": "white"},
+    )
+
+    for msmt in measurements:
+        fig = go.Figure(
+            go.Indicator(
+                mode="gauge+number",
+                value=data[msmt]["y"][-1],
+                domain={"x": [0.2, 0.8], "y": [0, 0.8]},
+                title=f"{msmt.upper()}",
+                gauge={
+                    "axis": {"tickwidth": 1, "tickcolor": "darkblue",},
+                    "bar": {"color": "darkblue"},
+                    "bgcolor": "white",
+                    "borderwidth": 2,
+                    "bordercolor": "gray",
+                },
+            )
+        )
+        fig.update_layout(layout)
+
+        children.append(
+            dcc.Graph(figure=fig, config={"displayModeBar": False}, className="gauge")
+        )
+
     return children
 
 
 @app.callback(
-    Output("status-boxes", "children"), [Input("in-memory-storage", "data"),],
+    Output("side-bar", "children"), [Input("in-memory-storage", "data"),],
 )
 def live_boxes(data):
     """
-    Generates live boxes as children of div 'status-boxes'
+    Generates components for the 'side-bar'
     """
     measurements = list(influx.get_measurements())
     # for now use all available measurements, instead data.keys?
@@ -235,15 +195,23 @@ def live_graphs(data):
         print("no measurements found in influxdb!")
 
     nrows = max(1, len(measurements))
-    fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True, vertical_spacing=0.02,)
+    fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True, vertical_spacing=0.05)
 
     # overall layout
     layout = dict(
-        paper_bgcolor="#000",
-        plot_bgcolor="#000",
-        margin=dict(l=0, r=0, b=0, t=0, pad=0),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
         # colorway=["#fff"],
-        xaxis3=dict(title="relative time [s]", color="#fff"),
+        margin=dict(l=10, r=10, b=10, t=10, pad=0),
+        xaxis=dict(zeroline=False, showgrid=False),
+        xaxis2=dict(zeroline=False, showgrid=False),
+        xaxis3=dict(
+            title="TIME [s]",
+            color="#fff",
+            showgrid=False,
+            zeroline=False,
+            range=[-30, 0],  # 30 seconds in the past
+        ),
         showlegend=False,
     )
 
@@ -263,12 +231,13 @@ def live_graphs(data):
             color="#fff",
             range=[min(data[measurement]["y"]), max(data[measurement]["y"])],
             showgrid=False,
+            zeroline=False,
+            showline=False,
         )
         if n == 0:
             layout["yaxis"] = y_layout
         else:
             layout[f"yaxis{n+1}"] = y_layout
-
     # set layout and return figure
     fig.update_layout(layout)
     return fig

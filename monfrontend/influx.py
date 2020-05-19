@@ -6,16 +6,11 @@ Todos:
 """
 # pylint: disable=bad-continuation
 
-import logging
-import os
 import time
 from typing import Dict, Iterable, Optional
 
 from influxdb import InfluxDBClient
 from influxdb.exceptions import InfluxDBClientError
-
-logger = logging.getLogger(__name__)
-logger.setLevel(os.environ.get("LOGLEVEL", "INFO"))
 
 
 class Influx:
@@ -41,7 +36,7 @@ class Influx:
                 host=self._host, port=self._port, database=self._database,
             )
         except InfluxDBClientError:
-            logger.exception("InfluxDB client error")
+            print("InfluxDB client error")
         self._client = client
         return client
 
