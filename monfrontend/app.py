@@ -31,7 +31,7 @@ logger.setLevel(os.environ.get("LOGLEVEL", "INFO"))
 
 INFLUXDB_HOST = os.environ.get("INFLUXDB_HOST", "localhost")
 INFLUXDB_PORT = int(os.environ.get("INFLUXDB_PORT", 8086))
-UPDATE_INTERVAL = float(os.environ.get("GRAPH_UPDATE_INTERVAL_SECONDS", 1))
+UPDATE_INTERVAL = float(os.environ.get("GRAPH_UPDATE_INTERVAL_SECONDS", "1"))
 INFLUXDB_DATABASE = os.environ.get("INFLUXDB_DATABASE", "default")
 
 
@@ -43,69 +43,40 @@ app = dash.Dash(__name__)
 app = dash.Dash(__name__)
 app.layout = html.Div(
     [
+        # Top Bar
+        html.Div([html.H2("VENT MODE", className="mode_box")],),
         html.Div(
             [
-                ## Top Bar
-                html.Div(
-                    [
-                        html.Div(
-                            [html.H4("MODE", className="top_bar_title"),],
-                            className="one-third column top_bar_mode",
-                        ),
-                        html.Div(
-                            [html.H4("HDvent", className="top_bar_title"),],
-                            className="two-thirds column top_bar_info",
-                        ),
-                    ],
-                    className="top_bar",
-                ),
-                ## Main Display Area
-                html.Div(
-                    [
-                        # Live Plots
-                        html.Div(
-                            [
-                                html.Div(
-                                    [
-                                        dcc.Graph(
-                                            id="live-graphs",
-                                            style={"height": "80vh"},
-                                            animate=False,
-                                        ),
-                                    ],
-                                    className="live_plot",
-                                ),
-                                dcc.Interval(id="graph-update", interval=1 * 1000),
-                            ],
-                            className="two-thirds column live_plots",
-                        ),
-                        # Status Boxes
-                        html.Div(
-                            [
-                                # empty, to be filled when we get data
-                            ],
-                            id="status-boxes",
-                            className="one-third column status_boxes",
-                        ),
-                    ],
-                    className="main_display",
-                ),
-                ## Bottom Bar
-                html.Div(
-                    [
-                        html.Div(
-                            [html.H4("MACHINE PARAMETERS", className="top_bar_title"),],
-                            className="two-thirds column machine_parameters",
-                        ),
-                        html.Div(
-                            [html.H4("MACHINE STATUS", className="top_bar_title"),],
-                            className="one-third column machine_status",
-                        ),
-                    ],
-                    className="bottom_bar",
+                html.H3("HDvent"),
+                html.Img(
+                    src=app.get_asset_url("HDvent-logo.png"), className="top_bar_img",
                 ),
             ],
-            className="app_content",
+            className="top_bar",
+        ),
+        # Live Plots
+        html.Div(
+            [
+                dcc.Graph(
+                    id="live-graphs",
+                    animate=False,
+                    responsive=True,
+                    config={"displayModeBar": False},
+                    style=dict(height="100%", width="100%"),
+                ),
+            ],
+            className="main_display",
+        ),
+        # Sidebar
+        html.Div([], id="side-bar", className="side_bar",),
+        # Bottom bar
+        html.Div([], id="bottom-bar", className="bottom_bar",),
+        # Bottom info box
+        html.Div([], id="machine-status", className="info_box",),
+        dcc.Interval(
+            id="graph-update",
+            interval=int(float(UPDATE_INTERVAL) * 1000),
+            # disabled=True,
         ),
         dcc.Store(id="in-memory-storage", storage_type="memory"),
     ],
@@ -152,21 +123,81 @@ def fetch_data(intervals):
     """
     measurements_data = {}
     for measurement in influx.get_measurements():
-        data = list(influx.get_data(measurement, duration="30s"))
+        data = list(influx.get_data(measurement, duration="30s", groupby_time="100ms"))
 
         measurements_data[measurement] = {
             "x": [d["time"] for d in data],
-            "y": [d["value"] for d in data],
+            "y": [d["mean_value"] for d in data],
         }
     return measurements_data
 
 
+# Display live machine status on the right of the bottom bar (if this functionality is needed)
 @app.callback(
-    Output("status-boxes", "children"), [Input("in-memory-storage", "data"),],
+    Output("machine-status", "children"), [Input("in-memory-storage", "data"),],
+)
+def live_status(data):
+    """
+    Generates 'machine-status' component
+    """
+    # Fetch machine status from influx here
+
+    machine_status = 1
+    return [html.H6(f"Status: {machine_status}")]
+
+
+# callback to display multiple live machine parameters in the left of the bottom bar
+@app.callback(
+    Output("bottom-bar", "children"), [Input("in-memory-storage", "data"),],
+)
+def live_machine(data):
+    """
+    Generates components for the 'bottom-bar'
+    """
+    measurements = list(influx.get_measurements())
+    # for now use all available measurements, instead data.keys?
+
+    children = []
+
+    layout = dict(
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        margin=dict(l=0, r=0, b=0, t=0, pad=5),
+        showlegend=False,
+        font={"color": "white"},
+    )
+
+    for msmt in measurements:
+        fig = go.Figure(
+            go.Indicator(
+                mode="gauge+number",
+                value=data[msmt]["y"][-1],
+                domain={"x": [0.2, 0.8], "y": [0, 0.8]},
+                title=f"{msmt.upper()}",
+                gauge={
+                    "axis": {"tickwidth": 1, "tickcolor": "darkblue",},
+                    "bar": {"color": "darkblue"},
+                    "bgcolor": "white",
+                    "borderwidth": 2,
+                    "bordercolor": "gray",
+                },
+            )
+        )
+        fig.update_layout(layout)
+
+        children.append(
+            dcc.Graph(figure=fig, config={"displayModeBar": False}, className="gauge")
+        )
+
+    return children
+
+
+@app.callback(
+    Output("side-bar", "children"), [Input("in-memory-storage", "data"),],
 )
 def live_boxes(data):
     """
-    Generates live boxes as children of div 'status-boxes'
+    Generates components for the 'side-bar'
     """
     measurements = SIDE_BAR_MEASUREMENTS
     children = []
@@ -181,9 +212,9 @@ def live_boxes(data):
         children.append(
             html.Div(
                 [
-                    html.H6(f"{display_name}", className="top_bar_title"),
-                    html.H1(f"{data[msmt]['y'][-1]}", className="top_bar_title"),
-                    html.H6(
+                    html.H4(f"{msmt.upper()}", className="top_bar_title"),
+                    html.H3(f"{data[msmt]['y'][-1]}", className="top_bar_title"),
+                    html.H4(
                         f"mean: {mean_:.2f}  max: {max_:.2f}", className="top_bar_title"
                     ),
                 ],
@@ -200,16 +231,28 @@ def live_graphs(data):
     """
     Generates live figure with subplots for each measurement
     """
-    measurements = PLOT_MEASUREMENTS
-    nrows = len(measurements)
-    fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True, vertical_spacing=0.02,)
+    measurements = list(influx.get_measurements())
+    if not measurements:
+        print("no measurements found in influxdb!")
+
+    nrows = max(1, len(measurements))
+    fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True, vertical_spacing=0.05)
 
     # overall layout
     layout = dict(
-        paper_bgcolor="#000",
-        plot_bgcolor="#000",
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
         # colorway=["#fff"],
-        xaxis3=dict(title="relative time [s]", color="#fff"),
+        margin=dict(l=10, r=10, b=10, t=10, pad=0),
+        xaxis=dict(zeroline=False, showgrid=False),
+        xaxis2=dict(zeroline=False, showgrid=False),
+        xaxis3=dict(
+            title="TIME [s]",
+            color="#fff",
+            showgrid=False,
+            zeroline=False,
+            range=[-30, 0],  # 30 seconds in the past
+        ),
         showlegend=False,
     )
 
@@ -234,12 +277,13 @@ def live_graphs(data):
             color="#fff",
             range=[min(data[measurement]["y"]), max(data[measurement]["y"])],
             showgrid=False,
+            zeroline=False,
+            showline=False,
         )
         if n == 0:
             layout["yaxis"] = y_layout
         else:
             layout[f"yaxis{n+1}"] = y_layout
-
     # set layout and return figure
     fig.update_layout(layout)
     return fig

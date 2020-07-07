@@ -1,75 +1,96 @@
 body {
-    font-family: "Open Sans", sans-serif;
+	font-family: "Open Sans", sans-serif;
 	color: #fff;
-    background-color: #000;
+	background-color: rgb(44, 44, 44);
+	overflow-x: hidden;
+	overflow-y: hidden;
 }
-
-
 
 .app_container {
-	height: 100vh;
+	height: 98vh;
+	width: 98vw;
+	align-self: center;
+	justify-self: center;
+	border-style: solid;
+	border-color: rgb(255, 255, 255);
+	border-width: 4px;
+	display: grid;
+	grid-template-columns: 25% 25% 25% 25%;
+	grid-template-rows: 50px auto 25%;
+	grid-template-areas: "modebox header header header" "main   main   main   sidebar" "footer footer footer infobox";
 }
 
-.app_content {
-	height: 100%;
-	display:flex;
-	flex-direction:column;
-	border-style: none;
-	border-color: #fff;
-}
+/* Main Areas */
 
 .top_bar {
-    color: #fff;
-	height: 10vh;
-	border-style: none;
-	border-color: #fff;
+	grid-area: header;
+	border-style: solid;
+	border-color: rgb(255, 255, 255);
+	border-width: 2px;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-around;
+	align-items: center;
 }
 
 .main_display {
-    color: #fff;
-	height: 80vh;
-	display: inline;
+	grid-area: main;
+	border-style: solid;
+	border-color: rgb(255, 255, 255);
+	border-width: 2px;
 }
 
-.live-plots {
-	color: #fff;
-  height:100%;
-  width:100%;
-}
-
-.live-plot {
-  height: 100%;
-  width: 100%;
-  color: #fff;
- }
-
-.status_boxes{
-  height:100%;
-  display:flex;
-  flex-direction:column;
-}
-
-.status_box{
-  height:100%;
-  	border-style: solid;
-	border-color: #fff;
+.side_bar {
+	grid-area: sidebar;
+	display: flex;
+	flex-direction: column;
+	align-items: stretch
 }
 
 .bottom_bar {
-	height: 10vh;
-	color; #fff;
-	border-style: none;
-	border-color: #fff;
+	grid-area: footer;
+	border-style: solid;
+	border-color: rgb(255, 255, 255);
+	border-width: 2px;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
 }
 
-.machine_parameters {
-	width:100%;
-	height:100%;
+.info_box {
+	grid-area: infobox;
+	border-style: solid;
+	border-color: rgb(255, 255, 255);
+	border-width: 2px;
 }
 
-.machine_status{
-	width:100%;
-	height:100%;
-	border-style: none;
-	border-color: #fff;
+/* Styled Components */
+
+.mode_box {
+	width: 100%;
+	height: 46px;
+	border-style: solid;
+	border-color: rgb(255, 255, 255);
+	border-width: 2px;
+	text-align: center;
+	justify-content: center;
+}
+
+.top_bar_img {
+	height: 40px;
+	width: auto;
+}
+
+/* plotly gauges */
+
+.gauge {
+	height: 100%;
+	width: 100%;
+}
+
+.status_box {
+	flex-grow: 1;
+	border-style: solid;
+	border-color: rgb(255, 252, 252);
+	border-width: 2px;
 }
