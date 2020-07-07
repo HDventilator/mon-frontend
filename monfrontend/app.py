@@ -154,7 +154,7 @@ def live_machine(data):
     """
     Generates components for the 'bottom-bar'
     """
-    measurements = list(influx.get_measurements())
+    measurements = BOTTOM_BAR_MEASUREMENTS["debug"]
     # for now use all available measurements, instead data.keys?
 
     children = []
@@ -231,7 +231,7 @@ def live_graphs(data):
     """
     Generates live figure with subplots for each measurement
     """
-    measurements = list(influx.get_measurements())
+    measurements = PLOT_MEASUREMENTS
     if not measurements:
         print("no measurements found in influxdb!")
 

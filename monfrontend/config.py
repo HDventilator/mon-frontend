@@ -41,7 +41,7 @@ SIDE_BAR_MEASUREMENTS = ["DMpins", "DMflow", "DMcvol"]
 # user-set parameters to show in bottom bar, depending on the current mode
 # key = mode identifier
 # Dict[str, List[str]]
-BOTTOM_BAR_MEASUREMENTS = {"debug": ["PvPins", "PvTins", "Pvfreq", "Pvslope"]}
+BOTTOM_BAR_MEASUREMENTS = {"debug": ["PvVolu", "PvT_in", "Pvfreq"]}
 
 ##################
 # METAINFO MAPPINGS
