@@ -14,7 +14,7 @@ import plotly.graph_objs as go
 from dash.dependencies import Input, Output
 from plotly.subplots import make_subplots
 
-from .config import (
+from monfrontend.config import (
     ALARMS_META,
     BOTTOM_BAR_MEASUREMENTS,
     MEASUREMENTS_META,
@@ -22,7 +22,7 @@ from .config import (
     PLOT_MEASUREMENTS,
     SIDE_BAR_MEASUREMENTS,
 )
-from .influx import Influx
+from monfrontend.influx import Influx
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -246,4 +246,7 @@ def live_graphs(data):
 
 
 if __name__ == "__main__":
+    client = influx._get_client()
+    print(client.get_list_measurements())
+
     app.run_server(host="0.0.0.0", port=8050, debug=True)

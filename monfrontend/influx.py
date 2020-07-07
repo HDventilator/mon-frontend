@@ -73,8 +73,9 @@ class Influx:
             return self._client
 
         try:
+            # TODO changed to UDP does this match influxdb config?
             client = InfluxDBClient(
-                host=self._host, port=self._port, database=self._database,
+                host=self._host, udp_port=self._port, database=self._database, use_udp=True,
             )
         except InfluxDBClientError:
             logger.exception("InfluxDB client error")

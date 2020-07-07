@@ -32,11 +32,11 @@ Notes:
 
 # measurements to show live time-series plots
 # List[str]
-PLOT_MEASUREMENTS = ["DMpres", "DMflow", "DMcvol"]
+PLOT_MEASUREMENTS = ["DMpins", "DMflow", "DMcvol"]
 
 # measurements to show in box column on right side
 # List[str]
-SIDE_BAR_MEASUREMENTS = ["DMpres", "DMpeep", "DMmvol", "DMfreq", "DMvtid"]
+SIDE_BAR_MEASUREMENTS = ["DMpins", "DMflow", "DMcvol"]
 
 # user-set parameters to show in bottom bar, depending on the current mode
 # key = mode identifier
@@ -49,8 +49,9 @@ BOTTOM_BAR_MEASUREMENTS = {"debug": ["PvPins", "PvTins", "Pvfreq", "Pvslope"]}
 
 # metainformation for diagnostic measurements
 # Dict[str, Dict[str, str]]
-MEASUREMENTS_META = {"DMpres": {"display_name": "Insp. Pressure", "unit": "mBar"},
+MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar"},
                      "DMflow": {"display_name": "Flow", "unit": "mL"},
+                     "DMcvol": {"display_name": "Volume", "unit": "mL"},
                      "DMpeep": {"display_name": "PEEP", "unit": "mBar"},
                      "DMmvol": {"display_name": "Vminute", "unit": "L"},
                      "DMfreq": {"display_name": "f", "unit": "/min"},
