@@ -168,18 +168,20 @@ def live_machine(data):
     )
 
     for msmt in measurements:
+        display_name = get_metainfo(MetaType.PARAMETER, msmt, "display_name")
+        unit = get_metainfo(MetaType.PARAMETER, msmt, "unit")
         fig = go.Figure(
             go.Indicator(
                 mode="gauge+number",
                 value=data[msmt]["y"][-1],
                 domain={"x": [0.2, 0.8], "y": [0, 0.8]},
-                title=f"{msmt.upper()}",
+                title=f"{display_name} [{unit}]",
                 gauge={
-                    "axis": {"tickwidth": 1, "tickcolor": "darkblue",},
-                    "bar": {"color": "darkblue"},
-                    "bgcolor": "white",
-                    "borderwidth": 2,
-                    "bordercolor": "gray",
+                    # "axis": {"tickwidth": 1, "tickcolor": "darkblue",},
+                    # "bar": {"color": "darkblue"},
+                    # "bgcolor": "white",
+                    # "borderwidth": 2,
+                    # "bordercolor": "gray",
                 },
             )
         )
@@ -212,8 +214,8 @@ def live_boxes(data):
         children.append(
             html.Div(
                 [
-                    html.H4(f"{msmt.upper()}", className="top_bar_title"),
-                    html.H3(f"{data[msmt]['y'][-1]}", className="top_bar_title"),
+                    html.H4(f"{MEASUREMENTS_META[msmt]['display_name']} [{MEASUREMENTS_META[msmt]['unit']}]", className="top_bar_title"),
+                    html.H3(f"{data[msmt]['y'][-1]:.3g}", className="top_bar_title"),
                     html.H4(
                         f"mean: {mean_:.2f}  max: {max_:.2f}", className="top_bar_title"
                     ),
@@ -262,6 +264,7 @@ def live_graphs(data):
         # FIXME: can we be sure this is a measurement?
         display_name = get_metainfo(MetaType.MEASUREMENT, measurement, "display_name")
         unit = get_metainfo(MetaType.MEASUREMENT, measurement, "unit")
+        range = get_metainfo(MetaType.MEASUREMENT, measurement, "range")
 
         trace = go.Scatter(
             x=data[measurement]["x"],
@@ -275,7 +278,7 @@ def live_graphs(data):
         y_layout = dict(
             title=f"{display_name.upper()} [{unit}]",
             color="#fff",
-            range=[min(data[measurement]["y"]), max(data[measurement]["y"])],
+            range=range,
             showgrid=False,
             zeroline=False,
             showline=False,

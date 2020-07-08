@@ -36,7 +36,7 @@ PLOT_MEASUREMENTS = ["DMpins", "DMflow", "DMcvol"]
 
 # measurements to show in box column on right side
 # List[str]
-SIDE_BAR_MEASUREMENTS = ["DMpins", "DMflow", "DMcvol"]
+SIDE_BAR_MEASUREMENTS = ["DMpeep", "DMflow", "DMtvol", "DMmvol"]
 
 # user-set parameters to show in bottom bar, depending on the current mode
 # key = mode identifier
@@ -49,20 +49,20 @@ BOTTOM_BAR_MEASUREMENTS = {"debug": ["PvVolu", "PvT_in", "Pvfreq"]}
 
 # metainformation for diagnostic measurements
 # Dict[str, Dict[str, str]]
-MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar"},
-                     "DMflow": {"display_name": "Flow", "unit": "mL"},
-                     "DMcvol": {"display_name": "Volume", "unit": "mL"},
-                     "DMpeep": {"display_name": "PEEP", "unit": "mBar"},
-                     "DMmvol": {"display_name": "Vminute", "unit": "L"},
-                     "DMfreq": {"display_name": "f", "unit": "/min"},
-                     "DMvtid": {"display_name": "Vtidal", "unit": "mL"}}
+MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar", "range": [0, 60]},
+                     "DMflow": {"display_name": "Flow", "unit": "mL", "range": [-400, 400]},
+                     "DMcvol": {"display_name": "Volume", "unit": "mL", "range": [0, 700]},
+                     "DMpeep": {"display_name": "PEEP", "unit": "mBar", "range": [0, 60]},
+                     "DMmvol": {"display_name": "Minute Volume", "unit": "L", "range": [0, 10]},
+                     "DMtvol": {"display_name": "Tidal Volume", "unit": "mL", "range": [0, 800]},
+                     "DMfreq": {"display_name": "f", "unit": "/min", "range": [0, 30]},
+                     "DMvtid": {"display_name": "Vtidal", "unit": "mL", "range": [0, 60]}}
 
 # metainformation for user-set parameters
 # Dict[str, Dict[str, str]]
-PARAMETERS_META = {"PvPins": {"display_name": "Pinsp", "unit": "mBar"},
-                   "PvTins": {"display_name": "Tin", "unit": "mBar"},
-                   "Pvfreq": {"display_name": "f", "unit": "mBar"},
-                   "Pvslope": {"display_name": "Slope", "unit": "mBar"}
+PARAMETERS_META = {"PvVolu": {"display_name": "Pinsp", "unit": "%"},
+                   "PvT_in": {"display_name": "T_in", "unit": "s"},
+                   "Pvfreq": {"display_name": "f", "unit": "/min"},
                    }
 
 # metainformation for alarms
