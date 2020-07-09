@@ -65,7 +65,7 @@ class Influx:
             fields = "*"
         query_str = f"SELECT MEAN({fields})FROM {measurement} WHERE time > now()-{duration} GROUP BY time({groupby_time}) FILL(none)"  # pylint: disable=line-too-long
         client = self._get_client()
-        now = time.time_ns()
+        now = time.time_ns()-1.5e9
         query_result = client.query(query_str, epoch="ns")
         for datapt in query_result.get_points():
             # replace timestamp with relative time in seconds

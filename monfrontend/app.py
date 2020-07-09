@@ -102,7 +102,7 @@ def fetch_data(intervals):
     """
     measurements_data = {}
     for measurement in influx.get_measurements():
-        data = list(influx.get_data(measurement, duration="30s", groupby_time="100ms"))
+        data = list(influx.get_data(measurement, duration="32s", groupby_time="100ms"))
 
         measurements_data[measurement] = {
             "x": [d["time"] for d in data],
@@ -215,8 +215,8 @@ def live_graphs(data):
     measurements = PLOT_MEASUREMENTS
     x = [data[measurement]["x"] for measurement in measurements]
     y = [data[measurement]["y"] for measurement in measurements]
-
-    return {'y': y, 'x': x}, range(len(measurements)), len(x[0])
+    trace_indices = list(range(0,len(x)))
+    return {'y': y, 'x': x}, trace_indices, len(x[0])
 
 
 if __name__ == "__main__":
