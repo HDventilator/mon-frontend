@@ -44,16 +44,17 @@ app = dash.Dash(__name__)
 app.layout = html.Div(
     [
         # Top Bar
-        html.Div([html.H2("VENT MODE", className="mode_box")],),
+
         html.Div(
             [
-                html.H3("HDvent"),
-                html.Img(
-                    src=app.get_asset_url("HDvent-logo.png"), className="top_bar_img",
-                ),
+                html.H4("HDvent"),
+                # html.Img(
+                #     src=app.get_asset_url("HDvent-logo.png"), className="top_bar_img",
+                # ),
             ],
-            className="top_bar",
+            className="tile top_bar",
         ),
+        #html.Div([html.H2("VC open loop", className="tile mode_box")], ),
         # Live Plots
         html.Div(
             [
@@ -65,14 +66,14 @@ app.layout = html.Div(
                     style=dict(height="100%", width="100%"),
                 ),
             ],
-            className="main_display",
+            className="tile main_display",
         ),
         # Sidebar
-        html.Div([], id="side-bar", className="side_bar",),
+        html.Div([], id="side-bar", className="tile side_bar",),
         # Bottom bar
-        html.Div([], id="bottom-bar", className="bottom_bar",),
+        html.Div([], id="bottom-bar", className="tile bottom_bar",),
         # Bottom info box
-        html.Div([], id="machine-status", className="info_box",),
+        html.Div([], id="machine-status", className="tile info_box",),
         dcc.Interval(
             id="graph-update",
             interval=int(float(UPDATE_INTERVAL) * 1000),
@@ -143,7 +144,7 @@ def live_status(data):
     # Fetch machine status from influx here
 
     machine_status = 1
-    return [html.H6(f"Status: {machine_status}")]
+    return [html.H6("VC open loop")]
 
 
 # callback to display multiple live machine parameters in the left of the bottom bar
@@ -178,7 +179,7 @@ def live_machine(data):
                 title=f"{display_name} [{unit}]",
                 gauge={
                     # "axis": {"tickwidth": 1, "tickcolor": "darkblue",},
-                    # "bar": {"color": "darkblue"},
+                     "bar": {"color": "rgb(251, 163, 101)"},
                     # "bgcolor": "white",
                     # "borderwidth": 2,
                     # "bordercolor": "gray",
@@ -214,10 +215,10 @@ def live_boxes(data):
         children.append(
             html.Div(
                 [
-                    html.H4(f"{MEASUREMENTS_META[msmt]['display_name']} [{MEASUREMENTS_META[msmt]['unit']}]", className="top_bar_title"),
+                    html.H5(f"{MEASUREMENTS_META[msmt]['display_name']} [{MEASUREMENTS_META[msmt]['unit']}]", className="top_bar_title"),
                     html.H3(f"{data[msmt]['y'][-1]:.3g}", className="top_bar_title"),
-                    html.H4(
-                        f"mean: {mean_:.2f}  max: {max_:.2f}", className="top_bar_title"
+                    html.H6(
+                        f"mean: {mean_:.3g},  max: {max_:.3g}", className="top_bar_title"
                     ),
                 ],
                 className="status_box",
@@ -238,20 +239,22 @@ def live_graphs(data):
         print("no measurements found in influxdb!")
 
     nrows = max(1, len(measurements))
-    fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True, vertical_spacing=0.05)
+    fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True, vertical_spacing=0.1)
 
+    grid_style = dict(showgrid=True,
+                      gridcolor='rgba(255,255,255,0.2)')
     # overall layout
     layout = dict(
         paper_bgcolor="rgba(0,0,0,0)",
         plot_bgcolor="rgba(0,0,0,0)",
         # colorway=["#fff"],
         margin=dict(l=10, r=10, b=10, t=10, pad=0),
-        xaxis=dict(zeroline=False, showgrid=False),
-        xaxis2=dict(zeroline=False, showgrid=False),
+        xaxis=dict(zeroline=False, **grid_style),
+        xaxis2=dict(zeroline=False, **grid_style),
         xaxis3=dict(
-            title="TIME [s]",
+            title="time [s]",
             color="#fff",
-            showgrid=False,
+            **grid_style,
             zeroline=False,
             range=[-30, 0],  # 30 seconds in the past
         ),
@@ -265,6 +268,8 @@ def live_graphs(data):
         display_name = get_metainfo(MetaType.MEASUREMENT, measurement, "display_name")
         unit = get_metainfo(MetaType.MEASUREMENT, measurement, "unit")
         range = get_metainfo(MetaType.MEASUREMENT, measurement, "range")
+        color = PLOT_MEASUREMENTS[measurement]['color']
+        fillcolor = PLOT_MEASUREMENTS[measurement]['fillcolor']
 
         trace = go.Scatter(
             x=data[measurement]["x"],
@@ -272,14 +277,17 @@ def live_graphs(data):
             name=measurement,
             fill="tozeroy",
             mode="lines",
+            fillcolor=fillcolor,
+            line=dict(color=color, width=1)
         )
         fig.add_trace(trace, row=n + 1, col=1)
 
         y_layout = dict(
-            title=f"{display_name.upper()} [{unit}]",
+            title=f"{display_name} [{unit}]",
             color="#fff",
             range=range,
-            showgrid=False,
+            **grid_style,
+            #gridwith=0.5,
             zeroline=False,
             showline=False,
         )
@@ -289,6 +297,7 @@ def live_graphs(data):
             layout[f"yaxis{n+1}"] = y_layout
     # set layout and return figure
     fig.update_layout(layout)
+
     return fig
 
 
@@ -296,4 +305,4 @@ if __name__ == "__main__":
     client = influx._get_client()
     print(client.get_list_measurements())
 
-    app.run_server(host="0.0.0.0", port=8050, debug=True)
+    app.run_server(host="0.0.0.0", port=8050, debug=True, dev_tools_ui=False)

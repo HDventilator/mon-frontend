@@ -32,7 +32,9 @@ Notes:
 
 # measurements to show live time-series plots
 # List[str]
-PLOT_MEASUREMENTS = ["DMpins", "DMflow", "DMcvol"]
+PLOT_MEASUREMENTS = {"DMpins": dict(color='rgb(101, 251, 151)', fillcolor='rgba(101, 251, 151,0.2)'),
+                     "DMflow": dict(color='rgb(101, 251, 251)', fillcolor='rgba(101, 251, 251,0.2)'),
+                     "DMcvol": dict(color='rgb(176, 101, 251)', fillcolor='rgba(176, 101, 251,0.2)')}
 
 # measurements to show in box column on right side
 # List[str]
@@ -60,7 +62,7 @@ MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar"
 
 # metainformation for user-set parameters
 # Dict[str, Dict[str, str]]
-PARAMETERS_META = {"PvVolu": {"display_name": "Pinsp", "unit": "%"},
+PARAMETERS_META = {"PvVolu": {"display_name": "Volume", "unit": "%"},
                    "PvT_in": {"display_name": "T_in", "unit": "s"},
                    "Pvfreq": {"display_name": "f", "unit": "/min"},
                    }
