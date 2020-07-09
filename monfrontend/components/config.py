@@ -62,9 +62,9 @@ MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar"
 
 # metainformation for user-set parameters
 # Dict[str, Dict[str, str]]
-PARAMETERS_META = {"PvVolu": {"display_name": "Volume", "unit": "%"},
-                   "PvT_in": {"display_name": "T_in", "unit": "s"},
-                   "Pvfreq": {"display_name": "f", "unit": "/min"},
+PARAMETERS_META = {"PvVolu": {"display_name": "Volume", "unit": "%", "total_range": [0, 100]},
+                   "PvT_in": {"display_name": "T_in", "unit": "s", "total_range": [0, 5]},
+                   "Pvfreq": {"display_name": "f", "unit": "/min", "total_range": [0, 35]},
                    }
 
 # metainformation for alarms

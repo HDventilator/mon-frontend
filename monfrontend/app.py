@@ -4,26 +4,22 @@ Main dash app
 # pylint: disable=unused-argument
 import logging
 import os
-from enum import Enum
-from typing import Optional
 
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
 from dash.dependencies import Input, Output
-from plotly.subplots import make_subplots
 
-from monfrontend.config import (
-    ALARMS_META,
+from monfrontend.components.config import (
     BOTTOM_BAR_MEASUREMENTS,
     MEASUREMENTS_META,
-    PARAMETERS_META,
     PLOT_MEASUREMENTS,
     SIDE_BAR_MEASUREMENTS,
 )
-from monfrontend.influx import Influx
-
+from monfrontend.components.influx import Influx
+from monfrontend.components.utils import get_metainfo, MetaType
+from monfrontend.components.figures import measurement_time_graphs
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.setLevel(os.environ.get("LOGLEVEL", "INFO"))
@@ -54,11 +50,13 @@ app.layout = html.Div(
             ],
             className="tile top_bar",
         ),
-        #html.Div([html.H2("VC open loop", className="tile mode_box")], ),
-        # Live Plots
+
+        # Time series plots
+
         html.Div(
             [
                 dcc.Graph(
+                    figure=measurement_time_graphs(),
                     id="live-graphs",
                     animate=False,
                     responsive=True,
@@ -92,26 +90,6 @@ def get_server():
     $ gunicorn -b 0.0.0.0:8050 'app:get_server()'
     """
     return app.server
-
-
-MetaType = Enum("MetaType", "MEASUREMENT, PARAMETER, ALARM")
-
-
-def get_metainfo(meta_type: MetaType, identifier: str, key: str) -> Optional[str]:
-    """
-    Retrieve metainfo `key` (e.g. "display_name" for the measurement identified
-    by `identifer` (e.g. "dpFLOW")
-    """
-    try:
-        if meta_type == MetaType.MEASUREMENT:
-            return MEASUREMENTS_META[identifier][key]
-        if meta_type == MetaType.PARAMETER:
-            return PARAMETERS_META[identifier][key]
-        if meta_type == MetaType.ALARM:
-            return ALARMS_META[identifier][key]
-    except KeyError:
-        pass
-    return None
 
 
 @app.callback(
@@ -228,81 +206,21 @@ def live_boxes(data):
 
 
 @app.callback(
-    Output("live-graphs", "figure"), [Input("in-memory-storage", "data"),],
+    Output("live-graphs", "extendData"), [Input("in-memory-storage", "data"),],
 )
 def live_graphs(data):
     """
     Generates live figure with subplots for each measurement
     """
     measurements = PLOT_MEASUREMENTS
-    if not measurements:
-        print("no measurements found in influxdb!")
+    x = [data[measurement]["x"] for measurement in measurements]
+    y = [data[measurement]["y"] for measurement in measurements]
 
-    nrows = max(1, len(measurements))
-    fig = make_subplots(rows=nrows, cols=1, shared_xaxes=True, vertical_spacing=0.1)
-
-    grid_style = dict(showgrid=True,
-                      gridcolor='rgba(255,255,255,0.2)')
-    # overall layout
-    layout = dict(
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        # colorway=["#fff"],
-        margin=dict(l=10, r=10, b=10, t=10, pad=0),
-        xaxis=dict(zeroline=False, **grid_style),
-        xaxis2=dict(zeroline=False, **grid_style),
-        xaxis3=dict(
-            title="time [s]",
-            color="#fff",
-            **grid_style,
-            zeroline=False,
-            range=[-30, 0],  # 30 seconds in the past
-        ),
-        showlegend=False,
-    )
-
-    # add traces and setup axes for each measurement
-    for n, measurement in enumerate(measurements):
-
-        # FIXME: can we be sure this is a measurement?
-        display_name = get_metainfo(MetaType.MEASUREMENT, measurement, "display_name")
-        unit = get_metainfo(MetaType.MEASUREMENT, measurement, "unit")
-        range = get_metainfo(MetaType.MEASUREMENT, measurement, "range")
-        color = PLOT_MEASUREMENTS[measurement]['color']
-        fillcolor = PLOT_MEASUREMENTS[measurement]['fillcolor']
-
-        trace = go.Scatter(
-            x=data[measurement]["x"],
-            y=data[measurement]["y"],
-            name=measurement,
-            fill="tozeroy",
-            mode="lines",
-            fillcolor=fillcolor,
-            line=dict(color=color, width=1)
-        )
-        fig.add_trace(trace, row=n + 1, col=1)
-
-        y_layout = dict(
-            title=f"{display_name} [{unit}]",
-            color="#fff",
-            range=range,
-            **grid_style,
-            #gridwith=0.5,
-            zeroline=False,
-            showline=False,
-        )
-        if n == 0:
-            layout["yaxis"] = y_layout
-        else:
-            layout[f"yaxis{n+1}"] = y_layout
-    # set layout and return figure
-    fig.update_layout(layout)
-
-    return fig
+    return {'y': y, 'x': x}, range(len(measurements)), len(x[0])
 
 
 if __name__ == "__main__":
     client = influx._get_client()
     print(client.get_list_measurements())
 
-    app.run_server(host="0.0.0.0", port=8050, debug=True, dev_tools_ui=False)
+    app.run_server(host="0.0.0.0", port=8050, debug=True, dev_tools_ui=True)
