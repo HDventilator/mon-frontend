@@ -54,6 +54,7 @@ class Influx:
         duration: str = "30s",
         fields: Optional[str] = None,
         groupby_time: str = "100ms",
+        now_offset: int = 1_500_000_000
     ) -> Iterable[Dict]:
         """
         Get data for the given measurement from InfluxDB. By default, gets all
@@ -65,7 +66,7 @@ class Influx:
             fields = "*"
         query_str = f"SELECT MEAN({fields})FROM {measurement} WHERE time > now()-{duration} GROUP BY time({groupby_time}) FILL(none)"  # pylint: disable=line-too-long
         client = self._get_client()
-        now = time.time_ns()-1.5e9
+        now = time.time_ns()-now_offset
         query_result = client.query(query_str, epoch="ns")
         for datapt in query_result.get_points():
             # replace timestamp with relative time in seconds
