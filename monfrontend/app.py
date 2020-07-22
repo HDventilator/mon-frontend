@@ -20,20 +20,18 @@ from monfrontend.components.config import (
 from monfrontend.components.influx import Influx
 from monfrontend.components.utils import get_metainfo, MetaType
 from monfrontend.components.figures import measurement_time_graphs
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 logger.setLevel(os.environ.get("LOGLEVEL", "INFO"))
-
 
 INFLUXDB_HOST = os.environ.get("INFLUXDB_HOST", "localhost")
 INFLUXDB_PORT = int(os.environ.get("INFLUXDB_PORT", 8086))
 UPDATE_INTERVAL = float(os.environ.get("GRAPH_UPDATE_INTERVAL_SECONDS", "1"))
 INFLUXDB_DATABASE = os.environ.get("INFLUXDB_DATABASE", "default")
 
-
 influx = Influx(INFLUXDB_HOST, INFLUXDB_DATABASE, INFLUXDB_PORT)
 app = dash.Dash(__name__)
-
 
 # App layout
 app = dash.Dash(__name__)
@@ -67,11 +65,11 @@ app.layout = html.Div(
             className="tile main_display",
         ),
         # Sidebar
-        html.Div([], id="side-bar", className="tile side_bar",),
+        html.Div([], id="side-bar", className="tile side_bar", ),
         # Bottom bar
-        html.Div([], id="bottom-bar", className="tile bottom_bar",),
+        html.Div([], id="bottom-bar", className="tile bottom_bar", ),
         # Bottom info box
-        html.Div([], id="machine-status", className="tile info_box",),
+        html.Div([], id="machine-status", className="tile info_box", ),
         dcc.Interval(
             id="graph-update",
             interval=int(float(UPDATE_INTERVAL) * 1000),
@@ -113,7 +111,7 @@ def fetch_data(intervals):
 
 # Display live machine status on the right of the bottom bar (if this functionality is needed)
 @app.callback(
-    Output("machine-status", "children"), [Input("in-memory-storage", "data"),],
+    Output("machine-status", "children"), [Input("in-memory-storage", "data"), ],
 )
 def live_status(data):
     """
@@ -127,7 +125,7 @@ def live_status(data):
 
 # callback to display multiple live machine parameters in the left of the bottom bar
 @app.callback(
-    Output("bottom-bar", "children"), [Input("in-memory-storage", "data"),],
+    Output("bottom-bar", "children"), [Input("in-memory-storage", "data"), ],
 )
 def live_machine(data):
     """
@@ -149,6 +147,12 @@ def live_machine(data):
     for msmt in measurements:
         display_name = get_metainfo(MetaType.PARAMETER, msmt, "display_name")
         unit = get_metainfo(MetaType.PARAMETER, msmt, "unit")
+        total_range = get_metainfo(MetaType.PARAMETER, msmt, "total_range")
+        min_key = get_metainfo(MetaType.PARAMETER, msmt, "min_key")
+        max_key = get_metainfo(MetaType.PARAMETER, msmt, "max_key")
+        range_min = data[min_key]["y"][-1]
+        range_max = data[max_key]["y"][-1]
+
         fig = go.Figure(
             go.Indicator(
                 mode="gauge+number",
@@ -156,8 +160,15 @@ def live_machine(data):
                 domain={"x": [0.2, 0.8], "y": [0, 0.8]},
                 title=f"{display_name} [{unit}]",
                 gauge={
-                    # "axis": {"tickwidth": 1, "tickcolor": "darkblue",},
-                     "bar": {"color": "rgb(251, 163, 101)"},
+                    "axis": {
+                        "range": total_range,
+                        # "tickwidth": 1,
+                        # "tickcolor": "darkblue",
+                    },
+                    "steps": [
+                        {"range": [range_min, range_max], "color": "rgba(251, 163, 101, 0.2)"}
+                    ],
+                    "bar": {"color": "rgb(251, 163, 101)"},
                     # "bgcolor": "white",
                     # "borderwidth": 2,
                     # "bordercolor": "gray",
@@ -174,7 +185,7 @@ def live_machine(data):
 
 
 @app.callback(
-    Output("side-bar", "children"), [Input("in-memory-storage", "data"),],
+    Output("side-bar", "children"), [Input("in-memory-storage", "data"), ],
 )
 def live_boxes(data):
     """
@@ -183,7 +194,6 @@ def live_boxes(data):
     measurements = SIDE_BAR_MEASUREMENTS
     children = []
     for msmt in measurements:
-
         # FIXME: can we be sure this is a measurement?
         display_name = get_metainfo(MetaType.MEASUREMENT, msmt, "display_name")
         unit = get_metainfo(MetaType.MEASUREMENT, msmt, "unit")
@@ -193,7 +203,8 @@ def live_boxes(data):
         children.append(
             html.Div(
                 [
-                    html.H5(f"{MEASUREMENTS_META[msmt]['display_name']} [{MEASUREMENTS_META[msmt]['unit']}]", className="top_bar_title"),
+                    html.H5(f"{MEASUREMENTS_META[msmt]['display_name']} [{MEASUREMENTS_META[msmt]['unit']}]",
+                            className="top_bar_title"),
                     html.H3(f"{data[msmt]['y'][-1]:.3g}", className="top_bar_title"),
                     html.H6(
                         f"mean: {mean_:.3g},  max: {max_:.3g}", className="top_bar_title"
@@ -206,7 +217,7 @@ def live_boxes(data):
 
 
 @app.callback(
-    Output("live-graphs", "extendData"), [Input("in-memory-storage", "data"),],
+    Output("live-graphs", "extendData"), [Input("in-memory-storage", "data"), ],
 )
 def live_graphs(data):
     """
@@ -215,7 +226,7 @@ def live_graphs(data):
     measurements = PLOT_MEASUREMENTS
     x = [data[measurement]["x"] for measurement in measurements]
     y = [data[measurement]["y"] for measurement in measurements]
-    trace_indices = list(range(0,len(x)))
+    trace_indices = list(range(0, len(x)))
     return {'y': y, 'x': x}, trace_indices, len(x[0])
 
 

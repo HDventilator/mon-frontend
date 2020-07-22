@@ -9,7 +9,7 @@ Notes:
     identifier: 6 chars total: two chars type, 4 chars id
     type:
       - 'Pv####' = "parameter,value"
-      - 'P^####' = "parameter,maximum"
+      - 'PM####' = "parameter,maximum"
       - 'P_####' = "parameter,minimum"
       - 'DM####' = "DiagnosticMeasurement" -> messwert
       - 'AM####' = (alarm)?
@@ -62,9 +62,9 @@ MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar"
 
 # metainformation for user-set parameters
 # Dict[str, Dict[str, str]]
-PARAMETERS_META = {"PvVolu": {"display_name": "Volume", "unit": "%", "total_range": [0, 100]},
-                   "PvT_in": {"display_name": "T_in", "unit": "s", "total_range": [0, 5]},
-                   "Pvfreq": {"display_name": "f", "unit": "/min", "total_range": [0, 35]},
+PARAMETERS_META = {"PvVolu": {"display_name": "Volume", "unit": "%", "total_range": [0, 100], "min_key": "P_Volu", "max_key": "PMVolu"},
+                   "PvT_in": {"display_name": "T_in", "unit": "s", "total_range": [0, 5], "min_key": "P_T_in", "max_key": "PMT_in"},
+                   "Pvfreq": {"display_name": "f", "unit": "/min", "total_range": [5, 35], "min_key": "P_freq", "max_key": "PMfreq"},
                    }
 
 # metainformation for alarms
