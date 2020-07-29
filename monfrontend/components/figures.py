@@ -67,7 +67,7 @@ def measurement_time_graphs():
         y_layout = dict(
             title=f"{display_name} [{unit}]",
             color="#fff",
-            range=range,
+            #range=range,
             **grid_style,
             #gridwith=0.5,
             zeroline=False,

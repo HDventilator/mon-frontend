@@ -52,7 +52,7 @@ BOTTOM_BAR_MEASUREMENTS = {"debug": ["PvVolu", "PvT_in", "Pvfreq"]}
 # metainformation for diagnostic measurements
 # Dict[str, Dict[str, str]]
 MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar", "range": [0, 60]},
-                     "DMflow": {"display_name": "Flow", "unit": "mL", "range": [-400, 400]},
+                     "DMflow": {"display_name": "Flow", "unit": "mL", "range": [0, 0.04]},
                      "DMcvol": {"display_name": "Volume", "unit": "mL", "range": [0, 700]},
                      "DMpeep": {"display_name": "PEEP", "unit": "mBar", "range": [0, 60]},
                      "DMmvol": {"display_name": "Minute Volume", "unit": "L", "range": [0, 10]},
