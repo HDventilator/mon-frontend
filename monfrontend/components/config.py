@@ -38,7 +38,7 @@ PLOT_MEASUREMENTS = {"DMpins": dict(color='rgb(101, 251, 151)', fillcolor='rgba(
 
 # measurements to show in box column on right side
 # List[str]
-SIDE_BAR_MEASUREMENTS = ["DMpeep", "DMflow", "DMtvol", "DMmvol"]
+SIDE_BAR_MEASUREMENTS = ["DMpeep", "DMflow", "DMtvol"]#, "DMmvol"]
 
 # user-set parameters to show in bottom bar, depending on the current mode
 # key = mode identifier
@@ -58,7 +58,8 @@ MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar"
                      "DMmvol": {"display_name": "Minute Volume", "unit": "L", "range": [0, 10]},
                      "DMtvol": {"display_name": "Tidal Volume", "unit": "mL", "range": [0, 800]},
                      "DMfreq": {"display_name": "f", "unit": "/min", "range": [0, 30]},
-                     "DMvtid": {"display_name": "Vtidal", "unit": "mL", "range": [0, 60]}}
+                     "DMvtid": {"display_name": "Vtidal", "unit": "mL", "range": [0, 60], "low_alarm_key":"ALvtid"}}
+
 
 
 # metainformation for user-set parameters

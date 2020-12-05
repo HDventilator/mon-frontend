@@ -193,10 +193,20 @@ def live_boxes(data):
     """
     measurements = SIDE_BAR_MEASUREMENTS
     children = []
+
     for msmt in measurements:
+        #alarm_lower = data[MEASUREMENTS_META[msmt]['min_key']]
+
         # FIXME: can we be sure this is a measurement?
         display_name = get_metainfo(MetaType.MEASUREMENT, msmt, "display_name")
         unit = get_metainfo(MetaType.MEASUREMENT, msmt, "unit")
+        low_alarm_key = get_metainfo(MetaType.MEASUREMENT, msmt, "low_alarm_key")
+
+        try:
+            low_alarm = data[low_alarm_key]
+        except:
+            pass
+
 
         mean_ = sum(data[msmt]["y"]) / len(data[msmt]["y"])
         max_ = max(data[msmt]["y"])
