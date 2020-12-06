@@ -193,6 +193,10 @@ def live_boxes(data):
     """
     measurements = SIDE_BAR_MEASUREMENTS
     children = []
+    # Alarm set codes
+    ALARM_CODES = {
+        0: "none", 1: "low", 2: "high", 3: "both"
+    }
 
     for msmt in measurements:
         #alarm_lower = data[MEASUREMENTS_META[msmt]['min_key']]
@@ -201,11 +205,35 @@ def live_boxes(data):
         display_name = get_metainfo(MetaType.MEASUREMENT, msmt, "display_name")
         unit = get_metainfo(MetaType.MEASUREMENT, msmt, "unit")
         low_alarm_key = get_metainfo(MetaType.MEASUREMENT, msmt, "low_alarm_key")
+        high_alarm_key = get_metainfo(MetaType.MEASUREMENT, msmt, "high_alarm_key")
+        alarm_set_key = get_metainfo(MetaType.MEASUREMENT, msmt, "alarm_set_key")
 
         try:
-            low_alarm = data[low_alarm_key]
-        except:
+            alarm_code = ALARM_CODES[data[alarm_set_key]]
+        except KeyError:
+            alarm_code = "none"
             pass
+
+        if alarm_code == "low":
+            try:
+                low_alarm_threshold = data[low_alarm_key]
+            except KeyError:
+                alarm_code = "none"
+                pass
+
+        if alarm_code == "high":
+            try:
+                high_alarm_threshold = data[high_alarm_key]
+            except KeyError:
+                alarm_code = "none"
+                pass
+
+        if alarm_code == "both":
+            try:
+                high_alarm_threshold = data[high_alarm_key]
+                low_alarm_threshold = data[low_alarm_key]
+            except KeyError:
+                alarm_code = "none"
 
 
         mean_ = sum(data[msmt]["y"]) / len(data[msmt]["y"])
