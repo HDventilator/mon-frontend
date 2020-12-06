@@ -209,7 +209,8 @@ def live_boxes(data):
         alarm_set_key = get_metainfo(MetaType.MEASUREMENT, msmt, "alarm_set_key")
 
         try:
-            alarm_code = ALARM_CODES[data[alarm_set_key]]
+            alarm_index = int(round(data[alarm_set_key]))
+            alarm_code = ALARM_CODES[alarm_index]
         except KeyError:
             alarm_code = "none"
             pass
@@ -244,9 +245,9 @@ def live_boxes(data):
                     html.H5(f"{MEASUREMENTS_META[msmt]['display_name']} [{MEASUREMENTS_META[msmt]['unit']}]",
                             className="top_bar_title"),
                     html.H3(f"{data[msmt]['y'][-1]:.3g}", className="top_bar_title"),
-                    html.H6(
+                    html.Div(html.H6(
                         f"mean: {mean_:.3g},  max: {max_:.3g}", className="top_bar_title"
-                    ),
+                    ),)
                 ],
                 className="status_box",
             )
