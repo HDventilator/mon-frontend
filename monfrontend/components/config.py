@@ -38,7 +38,7 @@ PLOT_MEASUREMENTS = {"DMpins": dict(color='rgb(101, 251, 151)', fillcolor='rgba(
 
 # measurements to show in box column on right side
 # List[str]
-SIDE_BAR_MEASUREMENTS = ["DMpeep", "DMflow", "DMtvol"]#, "DMmvol"]
+SIDE_BAR_MEASUREMENTS = ["DMpeep", "DMflow", "DMtvol"]  # , "DMmvol"]
 
 # user-set parameters to show in bottom bar, depending on the current mode
 # key = mode identifier
@@ -51,22 +51,33 @@ BOTTOM_BAR_MEASUREMENTS = {"debug": ["PvVolu", "PvT_in", "Pvfreq"]}
 
 # metainformation for diagnostic measurements
 # Dict[str, Dict[str, str]]
-MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar", "range": [0, 60], "min_key": "Dlpins", "max_key": "Dhpins"},
-                     "DMflow": {"display_name": "Flow", "unit": "mL", "range": [-400, 400]},
-                     "DMcvol": {"display_name": "Volume", "unit": "mL", "range": [0, 700]},
-                     "DMpeep": {"display_name": "PEEP", "unit": "mBar", "range": [0, 60]},
-                     "DMmvol": {"display_name": "Minute Volume", "unit": "L", "range": [0, 10]},
-                     "DMtvol": {"display_name": "Tidal Volume", "unit": "mL", "range": [0, 800]},
-                     "DMfreq": {"display_name": "f", "unit": "/min", "range": [0, 30]},
-                     "DMvtid": {"display_name": "Vtidal", "unit": "mL", "range": [0, 60], "low_alarm_key":"ALvtid"}}
-
-
+MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar", "range": [0, 60], "min_key": "Dlpins",
+                                "max_key": "Dhpins",
+                                "low_alarm_key": "LApins", "high_alarm_key": "HApins", "alarm_set_key": "SApins"},
+                     "DMflow": {"display_name": "Flow", "unit": "mL", "range": [-400, 400],
+                                "low_alarm_key": "LAflow", "high_alarm_key": "HAflow", "alarm_set_key": "SAflow"},
+                     "DMcvol": {"display_name": "Volume", "unit": "mL", "range": [0, 700],
+                                "low_alarm_key": "LAcvol", "high_alarm_key": "HAcvol", "alarm_set_key": "SAcvol"},
+                     "DMpeep": {"display_name": "PEEP", "unit": "mBar", "range": [0, 60],
+                                "low_alarm_key": "LApeep", "high_alarm_key": "HApeep", "alarm_set_key": "SApeep"},
+                     "DMmvol": {"display_name": "Minute Volume", "unit": "L", "range": [0, 10],
+                                "low_alarm_key": "LAmvol", "high_alarm_key": "HAmvol", "alarm_set_key": "SAmvol"},
+                     "DMtvol": {"display_name": "Tidal Volume", "unit": "mL", "range": [0, 800],
+                                "low_alarm_key": "LAtvol", "high_alarm_key": "HAtvol", "alarm_set_key": "SAtvol"},
+                     "DMfreq": {"display_name": "f", "unit": "/min", "range": [0, 30],
+                                "low_alarm_key": "LAfreq", "high_alarm_key": "HAfreq", "alarm_set_key": "SAfreq"},
+                     "DMvtid": {"display_name": "Vtidal", "unit": "mL", "range": [0, 60],
+                                "low_alarm_key": "LAvtid", "high_alarm_key": "HAvtid", "alarm_set_key": "SAvtid"}
+                     }
 
 # metainformation for user-set parameters
 # Dict[str, Dict[str, str]]
-PARAMETERS_META = {"PvVolu": {"display_name": "Volume", "unit": "%", "total_range": [0, 100], "min_key": "P_Volu", "max_key": "PMVolu"},
-                   "PvT_in": {"display_name": "T_in", "unit": "s", "total_range": [0, 5], "min_key": "P_T_in", "max_key": "PMT_in"},
-                   "Pvfreq": {"display_name": "f", "unit": "/min", "total_range": [5, 35], "min_key": "P_freq", "max_key": "PMfreq"},
+PARAMETERS_META = {"PvVolu": {"display_name": "Volume", "unit": "%", "total_range": [0, 100], "min_key": "P_Volu",
+                              "max_key": "PMVolu"},
+                   "PvT_in": {"display_name": "T_in", "unit": "s", "total_range": [0, 5], "min_key": "P_T_in",
+                              "max_key": "PMT_in"},
+                   "Pvfreq": {"display_name": "f", "unit": "/min", "total_range": [5, 35], "min_key": "P_freq",
+                              "max_key": "PMfreq"},
                    }
 
 # metainformation for alarms

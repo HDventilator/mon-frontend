@@ -184,6 +184,7 @@ def live_machine(data):
     return children
 
 
+
 @app.callback(
     Output("side-bar", "children"), [Input("in-memory-storage", "data"), ],
 )
@@ -208,8 +209,15 @@ def live_boxes(data):
         high_alarm_key = get_metainfo(MetaType.MEASUREMENT, msmt, "high_alarm_key")
         alarm_set_key = get_metainfo(MetaType.MEASUREMENT, msmt, "alarm_set_key")
 
+        low_alarm_threshold=None
+        high_alarm_threshold=None
+
+        low_alarm_string = ""
+        high_alarm_string = ""
+        alarm_format_string = "{0:.3g}"
+
         try:
-            alarm_index = int(round(data[alarm_set_key]))
+            alarm_index = int(round(data[alarm_set_key]["y"][-1]))
             alarm_code = ALARM_CODES[alarm_index]
         except KeyError:
             alarm_code = "none"
@@ -217,24 +225,33 @@ def live_boxes(data):
 
         if alarm_code == "low":
             try:
-                low_alarm_threshold = data[low_alarm_key]
+                low_alarm_threshold = data[low_alarm_key]["y"][-1]
+                low_alarm_string = alarm_format_string.format(low_alarm_threshold)
             except KeyError:
-                alarm_code = "none"
+                #alarm_code = "none"
                 pass
 
         if alarm_code == "high":
             try:
-                high_alarm_threshold = data[high_alarm_key]
+                high_alarm_threshold = data[high_alarm_key]["y"][-1]
+                high_alarm_string = alarm_format_string.format(high_alarm_threshold)
             except KeyError:
-                alarm_code = "none"
+                #alarm_code = "none"
                 pass
 
         if alarm_code == "both":
             try:
-                high_alarm_threshold = data[high_alarm_key]
-                low_alarm_threshold = data[low_alarm_key]
+                high_alarm_threshold = data[high_alarm_key]["y"][-1]
+                low_alarm_threshold = data[low_alarm_key]["y"][-1]
+                low_alarm_string = alarm_format_string.format(low_alarm_threshold)
+                high_alarm_string = alarm_format_string.format(high_alarm_threshold)
             except KeyError:
-                alarm_code = "none"
+                pass
+                #alarm_code = "none"
+
+
+
+
 
 
         mean_ = sum(data[msmt]["y"]) / len(data[msmt]["y"])
@@ -244,10 +261,20 @@ def live_boxes(data):
                 [
                     html.H5(f"{MEASUREMENTS_META[msmt]['display_name']} [{MEASUREMENTS_META[msmt]['unit']}]",
                             className="top_bar_title"),
-                    html.H3(f"{data[msmt]['y'][-1]:.3g}", className="top_bar_title"),
-                    html.Div(html.H6(
+                    html.Div([
+                        html.Div(html.H3(f"{data[msmt]['y'][-1]:.3g}", className="top_bar_title")
+                                 , style={'width': '30%', 'display': 'inline-block'}),
+                             html.Div([
+                                 html.H6(
+                                     high_alarm_string,
+                                 ),
+                                 html.H6(
+                                     low_alarm_string,
+                                 )]
+                                 , style={'display': 'inline-block'})]),
+                    html.H6(
                         f"mean: {mean_:.3g},  max: {max_:.3g}", className="top_bar_title"
-                    ),)
+                    ),
                 ],
                 className="status_box",
             )
