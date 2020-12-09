@@ -30,6 +30,13 @@ INFLUXDB_PORT = int(os.environ.get("INFLUXDB_PORT", 8086))
 UPDATE_INTERVAL = float(os.environ.get("GRAPH_UPDATE_INTERVAL_SECONDS", "1"))
 INFLUXDB_DATABASE = os.environ.get("INFLUXDB_DATABASE", "default")
 
+alarm_triggered_color = "rgb(255, 107, 107)"
+text_color = "white"
+font_weight = "normal"
+thresholds_color = 'rgb(101, 251, 151)'
+hi_alarm_format_string = "upper limit: {0:.3g}"
+lo_alarm_format_string = "lower limit: {0:.3g}"
+
 influx = Influx(INFLUXDB_HOST, INFLUXDB_DATABASE, INFLUXDB_PORT)
 app = dash.Dash(__name__)
 
@@ -228,12 +235,12 @@ def live_boxes(data, last_values):
         alarm_set_key = get_metainfo(MetaType.MEASUREMENT, msmt, "alarm_set_key")
         alarm_trigger_key = get_metainfo(MetaType.MEASUREMENT, msmt, "alarm_trigger_key")
 
-        low_alarm_threshold = 0
-        high_alarm_threshold = 10
+        #low_alarm_threshold = 0
+        #high_alarm_threshold = 10
 
         low_alarm_string = "\200"
         high_alarm_string = "\200"
-        alarm_format_string = "{0:.3g}"
+
 
         try:
             alarm_index = int(round(last_values[alarm_set_key]["y"]))
@@ -245,7 +252,7 @@ def live_boxes(data, last_values):
         if alarm_code == "low":
             try:
                 low_alarm_threshold = last_values[low_alarm_key]["y"]
-                low_alarm_string = alarm_format_string.format(low_alarm_threshold)
+                low_alarm_string = lo_alarm_format_string.format(low_alarm_threshold)
             except KeyError:
                 # alarm_code = "none"
                 pass
@@ -253,7 +260,7 @@ def live_boxes(data, last_values):
         if alarm_code == "high":
             try:
                 high_alarm_threshold = last_values[high_alarm_key]["y"]
-                high_alarm_string = alarm_format_string.format(high_alarm_threshold)
+                high_alarm_string = hi_alarm_format_string.format(high_alarm_threshold)
             except KeyError:
                 # alarm_code = "none"
                 pass
@@ -262,27 +269,36 @@ def live_boxes(data, last_values):
             try:
                 high_alarm_threshold = last_values[high_alarm_key]["y"]
                 low_alarm_threshold = last_values[low_alarm_key]["y"]
-                low_alarm_string = alarm_format_string.format(low_alarm_threshold)
-                high_alarm_string = alarm_format_string.format(high_alarm_threshold)
+                low_alarm_string = lo_alarm_format_string.format(low_alarm_threshold)
+                high_alarm_string = hi_alarm_format_string.format(high_alarm_threshold)
             except KeyError:
                 pass
                 # alarm_code = "none"
 
-        alarm_trigger_key = 0
+        alarm_trigger_state = 0
         try:
-            alarm_trigger_key = last_values[alarm_trigger_key]["y"]
-            alarm_trigger_key = int(round(alarm_trigger_key))
+            alarm_trigger_state = last_values[alarm_trigger_key]["y"]
+            alarm_trigger_state = int(round(alarm_trigger_state))
         except KeyError:
             pass
 
-        low_alarm_string ='0'
-        high_alarm_string ='10'
-        color_lo = "rgb(251, 163, 101)"#'rgb(101, 251, 151)'
-        color_hi = "rgb(251, 163, 101)"#'rgb(101, 251, 151)'
-        if alarm_trigger_key == 1:  # low alarm triggered
-            color_lo = "rgb(251, 163, 101)"
-        elif alarm_trigger_key == 2:  # high alarm triggered
-            color_hi = "rgb(251, 163, 101)"
+
+        color_lo = thresholds_color
+        color_hi = thresholds_color
+        main_number_color = text_color
+        font_weight='normal'
+
+        if alarm_trigger_state == 1:  # low alarm triggered
+            color_lo = alarm_triggered_color
+            main_number_color = alarm_triggered_color
+            font_weight = 'normal'
+        elif alarm_trigger_state == 2:  # high alarm triggered
+            color_hi = alarm_triggered_color
+            main_number_color = alarm_triggered_color
+            font_weight = 'normal'
+
+
+
 
 
         mean_ = sum(data[msmt]["y"]) / len(data[msmt]["y"])
@@ -293,7 +309,8 @@ def live_boxes(data, last_values):
                     html.H5(f"{MEASUREMENTS_META[msmt]['display_name']} [{MEASUREMENTS_META[msmt]['unit']}]",
                             className="top_bar_title"),
                     html.Div([
-                        html.Div(html.H3(f"{data[msmt]['y'][-1]:.3g}", className="top_bar_title")
+                        html.Div(html.H3(f"{data[msmt]['y'][-1]:.3g}", className="top_bar_title",
+                                         style={"color": main_number_color})
                                  , style={
                                 'width': '30%',
                                 'vertical-align':'middle',
@@ -307,14 +324,14 @@ def live_boxes(data, last_values):
                         html.Div([
                             html.Div([
                                 html.H6(
-                                    high_alarm_string, style={"color": color_lo, 'text-align': 'bottom'}
+                                    high_alarm_string, style={"color": color_hi, 'text-align': 'bottom', 'font-weight': font_weight}
                                 )
                             ], style={'min-height': '100%'}),
 
 
                             html.Div([
                                 html.H6(
-                                    low_alarm_string, style={"color": color_lo, 'text-align': 'top'}
+                                    low_alarm_string, style={"color": color_lo, 'text-align': 'top', 'font-weight': font_weight}
                                 )], style={'min-height': '100%'})
                         ]
                             , style={'display': 'table-cell',
