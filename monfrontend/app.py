@@ -9,7 +9,7 @@ import dash
 import dash_core_components as dcc
 import dash_html_components as html
 import plotly.graph_objs as go
-from dash.dependencies import Input, Output
+from dash.dependencies import Input, Output, State
 
 from monfrontend.components.config import (
     BOTTOM_BAR_MEASUREMENTS,
@@ -76,6 +76,7 @@ app.layout = html.Div(
             # disabled=True,
         ),
         dcc.Store(id="in-memory-storage", storage_type="memory"),
+        dcc.Store(id="last-value-storage", storage_type="memory"),
     ],
     className="app_container",
 )
@@ -109,6 +110,22 @@ def fetch_data(intervals):
     return measurements_data
 
 
+@app.callback(
+    Output("last-value-storage", "data"), [Input("in-memory-storage", "data"), ],
+    [State("last-value-storage", "data"), ]
+)
+def store_last_values(data, last_values):
+    if last_values is None:
+        last_values = dict()
+    for key in data:
+        if data[key]['x']:
+            last_values[key] = {
+                'x': data[key]['x'][-1],
+                'y': data[key]['y'][-1]
+            }
+    return last_values
+
+
 # Display live machine status on the right of the bottom bar (if this functionality is needed)
 @app.callback(
     Output("machine-status", "children"), [Input("in-memory-storage", "data"), ],
@@ -125,7 +142,8 @@ def live_status(data):
 
 # callback to display multiple live machine parameters in the left of the bottom bar
 @app.callback(
-    Output("bottom-bar", "children"), [Input("in-memory-storage", "data"), ],
+    Output("bottom-bar", "children"),
+    [Input("in-memory-storage", "data")],
 )
 def live_machine(data):
     """
@@ -184,11 +202,11 @@ def live_machine(data):
     return children
 
 
-
 @app.callback(
-    Output("side-bar", "children"), [Input("in-memory-storage", "data"), ],
+    Output("side-bar", "children"),
+    [Input("in-memory-storage", "data"), Input("last-value-storage", "data")],
 )
-def live_boxes(data):
+def live_boxes(data, last_values):
     """
     Generates components for the 'side-bar'
     """
@@ -200,7 +218,7 @@ def live_boxes(data):
     }
 
     for msmt in measurements:
-        #alarm_lower = data[MEASUREMENTS_META[msmt]['min_key']]
+        # alarm_lower = data[MEASUREMENTS_META[msmt]['min_key']]
 
         # FIXME: can we be sure this is a measurement?
         display_name = get_metainfo(MetaType.MEASUREMENT, msmt, "display_name")
@@ -208,16 +226,17 @@ def live_boxes(data):
         low_alarm_key = get_metainfo(MetaType.MEASUREMENT, msmt, "low_alarm_key")
         high_alarm_key = get_metainfo(MetaType.MEASUREMENT, msmt, "high_alarm_key")
         alarm_set_key = get_metainfo(MetaType.MEASUREMENT, msmt, "alarm_set_key")
+        alarm_trigger_key = get_metainfo(MetaType.MEASUREMENT, msmt, "alarm_trigger_key")
 
-        low_alarm_threshold=None
-        high_alarm_threshold=None
+        low_alarm_threshold = 0
+        high_alarm_threshold = 10
 
-        low_alarm_string = ""
-        high_alarm_string = ""
+        low_alarm_string = "\200"
+        high_alarm_string = "\200"
         alarm_format_string = "{0:.3g}"
 
         try:
-            alarm_index = int(round(data[alarm_set_key]["y"][-1]))
+            alarm_index = int(round(last_values[alarm_set_key]["y"]))
             alarm_code = ALARM_CODES[alarm_index]
         except KeyError:
             alarm_code = "none"
@@ -225,33 +244,45 @@ def live_boxes(data):
 
         if alarm_code == "low":
             try:
-                low_alarm_threshold = data[low_alarm_key]["y"][-1]
+                low_alarm_threshold = last_values[low_alarm_key]["y"]
                 low_alarm_string = alarm_format_string.format(low_alarm_threshold)
             except KeyError:
-                #alarm_code = "none"
+                # alarm_code = "none"
                 pass
 
         if alarm_code == "high":
             try:
-                high_alarm_threshold = data[high_alarm_key]["y"][-1]
+                high_alarm_threshold = last_values[high_alarm_key]["y"]
                 high_alarm_string = alarm_format_string.format(high_alarm_threshold)
             except KeyError:
-                #alarm_code = "none"
+                # alarm_code = "none"
                 pass
 
         if alarm_code == "both":
             try:
-                high_alarm_threshold = data[high_alarm_key]["y"][-1]
-                low_alarm_threshold = data[low_alarm_key]["y"][-1]
+                high_alarm_threshold = last_values[high_alarm_key]["y"]
+                low_alarm_threshold = last_values[low_alarm_key]["y"]
                 low_alarm_string = alarm_format_string.format(low_alarm_threshold)
                 high_alarm_string = alarm_format_string.format(high_alarm_threshold)
             except KeyError:
                 pass
-                #alarm_code = "none"
+                # alarm_code = "none"
 
+        alarm_trigger_key = 0
+        try:
+            alarm_trigger_key = last_values[alarm_trigger_key]["y"]
+            alarm_trigger_key = int(round(alarm_trigger_key))
+        except KeyError:
+            pass
 
-
-
+        low_alarm_string ='0'
+        high_alarm_string ='10'
+        color_lo = "rgb(251, 163, 101)"#'rgb(101, 251, 151)'
+        color_hi = "rgb(251, 163, 101)"#'rgb(101, 251, 151)'
+        if alarm_trigger_key == 1:  # low alarm triggered
+            color_lo = "rgb(251, 163, 101)"
+        elif alarm_trigger_key == 2:  # high alarm triggered
+            color_hi = "rgb(251, 163, 101)"
 
 
         mean_ = sum(data[msmt]["y"]) / len(data[msmt]["y"])
@@ -263,18 +294,35 @@ def live_boxes(data):
                             className="top_bar_title"),
                     html.Div([
                         html.Div(html.H3(f"{data[msmt]['y'][-1]:.3g}", className="top_bar_title")
-                                 , style={'width': '30%', 'display': 'inline-block'}),
-                             html.Div([
-                                 html.H6(
-                                     high_alarm_string,
-                                 ),
-                                 html.H6(
-                                     low_alarm_string,
-                                 )]
-                                 , style={'display': 'inline-block'})]),
-                    html.H6(
-                        f"mean: {mean_:.3g},  max: {max_:.3g}", className="top_bar_title"
-                    ),
+                                 , style={
+                                'width': '30%',
+                                'vertical-align':'middle',
+                                #'text-align': 'center',
+                                #'justify-content': 'center',
+                                #'align-items': 'center',
+                                'margin': '10px',
+                                'min-width': '100px',
+                                'display': 'table-cell'
+                            }),
+                        html.Div([
+                            html.Div([
+                                html.H6(
+                                    high_alarm_string, style={"color": color_lo, 'text-align': 'bottom'}
+                                )
+                            ], style={'min-height': '100%'}),
+
+
+                            html.Div([
+                                html.H6(
+                                    low_alarm_string, style={"color": color_lo, 'text-align': 'top'}
+                                )], style={'min-height': '100%'})
+                        ]
+                            , style={'display': 'table-cell',
+                                                'vertical-align': 'middle'
+        })]),
+                    # html.H6(
+                    #    f"mean: {mean_:.3g},  max: {max_:.3g}", className="top_bar_title"
+                    # ),
                 ],
                 className="status_box",
             )

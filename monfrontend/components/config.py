@@ -53,21 +53,29 @@ BOTTOM_BAR_MEASUREMENTS = {"debug": ["PvVolu", "PvT_in", "Pvfreq"]}
 # Dict[str, Dict[str, str]]
 MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar", "range": [0, 60], "min_key": "Dlpins",
                                 "max_key": "Dhpins",
-                                "low_alarm_key": "LApins", "high_alarm_key": "HApins", "alarm_set_key": "SApins"},
+                                "low_alarm_key": "LApins", "high_alarm_key": "HApins", "alarm_set_key": "SApins",
+                                "alarm_trigger_key": "TApins"},
                      "DMflow": {"display_name": "Flow", "unit": "mL", "range": [-400, 400],
-                                "low_alarm_key": "LAflow", "high_alarm_key": "HAflow", "alarm_set_key": "SAflow"},
+                                "low_alarm_key": "LAflow", "high_alarm_key": "HAflow", "alarm_set_key": "SAflow",
+                                "alarm_trigger_key": "TAflow"},
                      "DMcvol": {"display_name": "Volume", "unit": "mL", "range": [0, 700],
-                                "low_alarm_key": "LAcvol", "high_alarm_key": "HAcvol", "alarm_set_key": "SAcvol"},
+                                "low_alarm_key": "LAcvol", "high_alarm_key": "HAcvol", "alarm_set_key": "SAcvol",
+                                "alarm_trigger_key": "TAcvol"},
                      "DMpeep": {"display_name": "PEEP", "unit": "mBar", "range": [0, 60],
-                                "low_alarm_key": "LApeep", "high_alarm_key": "HApeep", "alarm_set_key": "SApeep"},
+                                "low_alarm_key": "LApeep", "high_alarm_key": "HApeep", "alarm_set_key": "SApeep",
+                                "alarm_trigger_key": "TApeep"},
                      "DMmvol": {"display_name": "Minute Volume", "unit": "L", "range": [0, 10],
-                                "low_alarm_key": "LAmvol", "high_alarm_key": "HAmvol", "alarm_set_key": "SAmvol"},
+                                "low_alarm_key": "LAmvol", "high_alarm_key": "HAmvol", "alarm_set_key": "SAmvol",
+                                "alarm_trigger_key": "TAmvol"},
                      "DMtvol": {"display_name": "Tidal Volume", "unit": "mL", "range": [0, 800],
-                                "low_alarm_key": "LAtvol", "high_alarm_key": "HAtvol", "alarm_set_key": "SAtvol"},
+                                "low_alarm_key": "LAtvol", "high_alarm_key": "HAtvol", "alarm_set_key": "SAtvol",
+                                "alarm_trigger_key": "TAtvol"},
                      "DMfreq": {"display_name": "f", "unit": "/min", "range": [0, 30],
-                                "low_alarm_key": "LAfreq", "high_alarm_key": "HAfreq", "alarm_set_key": "SAfreq"},
+                                "low_alarm_key": "LAfreq", "high_alarm_key": "HAfreq", "alarm_set_key": "SAfreq",
+                                "alarm_trigger_key": "TAfreq"},
                      "DMvtid": {"display_name": "Vtidal", "unit": "mL", "range": [0, 60],
-                                "low_alarm_key": "LAvtid", "high_alarm_key": "HAvtid", "alarm_set_key": "SAvtid"}
+                                "low_alarm_key": "LAvtid", "high_alarm_key": "HAvtid", "alarm_set_key": "SAvtid",
+                                "alarm_trigger_key": "TAvtid"}
                      }
 
 # metainformation for user-set parameters
