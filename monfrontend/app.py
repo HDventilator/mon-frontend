@@ -4,6 +4,7 @@ Main dash app
 # pylint: disable=unused-argument
 import logging
 import os
+import math
 
 import dash
 import dash_core_components as dcc
@@ -48,12 +49,13 @@ app.layout = html.Div(
 
         html.Div(
             [
-                html.H4("HDvent"),
-                # html.Img(
-                #     src=app.get_asset_url("HDvent-logo.png"), className="top_bar_img",
-                # ),
+                html.Img(
+                    src=app.get_asset_url("logo-pi.png"), className="top_bar_img", style={'padding': '20px'}
+                ),
+                html.H4("HDvent2020", style={'padding': '0px'}),
+
             ],
-            className="tile top_bar",
+            className="tile top_bar", style={'justify-content': 'left' }
         ),
 
         # Time series plots
@@ -209,6 +211,12 @@ def live_machine(data):
     return children
 
 
+def round_like(x, ref, n_significant=3):
+    d = int(math.ceil(math.log10(ref)))
+    n = max(n_significant-d,0)
+    return round(x, n)
+
+
 @app.callback(
     Output("side-bar", "children"),
     [Input("in-memory-storage", "data"), Input("last-value-storage", "data")],
@@ -230,17 +238,17 @@ def live_boxes(data, last_values):
         # FIXME: can we be sure this is a measurement?
         display_name = get_metainfo(MetaType.MEASUREMENT, msmt, "display_name")
         unit = get_metainfo(MetaType.MEASUREMENT, msmt, "unit")
+        range = get_metainfo(MetaType.MEASUREMENT, msmt, "range")
         low_alarm_key = get_metainfo(MetaType.MEASUREMENT, msmt, "low_alarm_key")
         high_alarm_key = get_metainfo(MetaType.MEASUREMENT, msmt, "high_alarm_key")
         alarm_set_key = get_metainfo(MetaType.MEASUREMENT, msmt, "alarm_set_key")
         alarm_trigger_key = get_metainfo(MetaType.MEASUREMENT, msmt, "alarm_trigger_key")
 
-        #low_alarm_threshold = 0
-        #high_alarm_threshold = 10
+        # low_alarm_threshold = 0
+        # high_alarm_threshold = 10
 
         low_alarm_string = "\200"
         high_alarm_string = "\200"
-
 
         try:
             alarm_index = int(round(last_values[alarm_set_key]["y"]))
@@ -282,11 +290,10 @@ def live_boxes(data, last_values):
         except KeyError:
             pass
 
-
         color_lo = thresholds_color
         color_hi = thresholds_color
         main_number_color = text_color
-        font_weight='normal'
+        font_weight = 'normal'
 
         if alarm_trigger_state == 1:  # low alarm triggered
             color_lo = alarm_triggered_color
@@ -297,26 +304,25 @@ def live_boxes(data, last_values):
             main_number_color = alarm_triggered_color
             font_weight = 'normal'
 
-
-
-
-
         mean_ = sum(data[msmt]["y"]) / len(data[msmt]["y"])
         max_ = max(data[msmt]["y"])
+
+        value = data[msmt]['y'][-1]
+        value = round_like(value, range[-1])
         children.append(
             html.Div(
                 [
                     html.H5(f"{MEASUREMENTS_META[msmt]['display_name']} [{MEASUREMENTS_META[msmt]['unit']}]",
                             className="top_bar_title"),
                     html.Div([
-                        html.Div(html.H3(f"{data[msmt]['y'][-1]:.3g}", className="top_bar_title",
+                        html.Div(html.H3(f"{value:.3g}", className="top_bar_title",
                                          style={"color": main_number_color})
                                  , style={
                                 'width': '30%',
-                                'vertical-align':'middle',
-                                #'text-align': 'center',
-                                #'justify-content': 'center',
-                                #'align-items': 'center',
+                                'vertical-align': 'middle',
+                                # 'text-align': 'center',
+                                # 'justify-content': 'center',
+                                # 'align-items': 'center',
                                 'margin': '10px',
                                 'min-width': '100px',
                                 'display': 'table-cell'
@@ -324,19 +330,20 @@ def live_boxes(data, last_values):
                         html.Div([
                             html.Div([
                                 html.H6(
-                                    high_alarm_string, style={"color": color_hi, 'text-align': 'bottom', 'font-weight': font_weight}
+                                    high_alarm_string,
+                                    style={"color": color_hi, 'text-align': 'bottom', 'font-weight': font_weight}
                                 )
                             ], style={'min-height': '100%'}),
 
-
                             html.Div([
                                 html.H6(
-                                    low_alarm_string, style={"color": color_lo, 'text-align': 'top', 'font-weight': font_weight}
+                                    low_alarm_string,
+                                    style={"color": color_lo, 'text-align': 'top', 'font-weight': font_weight}
                                 )], style={'min-height': '100%'})
                         ]
                             , style={'display': 'table-cell',
-                                                'vertical-align': 'middle'
-        })]),
+                                     'vertical-align': 'middle'
+                                     })]),
                     # html.H6(
                     #    f"mean: {mean_:.3g},  max: {max_:.3g}", className="top_bar_title"
                     # ),

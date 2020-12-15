@@ -38,7 +38,7 @@ PLOT_MEASUREMENTS = {"DMpins": dict(color='rgb(101, 251, 151)', fillcolor='rgba(
 
 # measurements to show in box column on right side
 # List[str]
-SIDE_BAR_MEASUREMENTS = ["DMpeep", "DMflow", "DMtvol"]  # , "DMmvol"]
+SIDE_BAR_MEASUREMENTS = ["DMpins", "DMpeep", "DMplat", "DMtvol", "DMmvol"]  # , "DMmvol"]
 
 # user-set parameters to show in bottom bar, depending on the current mode
 # key = mode identifier
@@ -51,11 +51,11 @@ BOTTOM_BAR_MEASUREMENTS = {"debug": ["PvVolu", "PvT_in", "Pvfreq"]}
 
 # metainformation for diagnostic measurements
 # Dict[str, Dict[str, str]]
-MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar", "range": [0, 60], "min_key": "Dlpins",
+MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar", "range": [0, 55], "min_key": "Dlpins",
                                 "max_key": "Dhpins",
                                 "low_alarm_key": "LApins", "high_alarm_key": "HApins", "alarm_set_key": "SApins",
                                 "alarm_trigger_key": "TApins"},
-                     "DMflow": {"display_name": "Flow", "unit": "mL", "range": [-400, 400],
+                     "DMflow": {"display_name": "Flow", "unit": "mL", "range": [-600, 600],
                                 "low_alarm_key": "LAflow", "high_alarm_key": "HAflow", "alarm_set_key": "SAflow",
                                 "alarm_trigger_key": "TAflow"},
                      "DMcvol": {"display_name": "Volume", "unit": "mL", "range": [0, 700],
@@ -75,7 +75,13 @@ MEASUREMENTS_META = {"DMpins": {"display_name": "Insp. Pressure", "unit": "mBar"
                                 "alarm_trigger_key": "TAfreq"},
                      "DMvtid": {"display_name": "Vtidal", "unit": "mL", "range": [0, 60],
                                 "low_alarm_key": "LAvtid", "high_alarm_key": "HAvtid", "alarm_set_key": "SAvtid",
-                                "alarm_trigger_key": "TAvtid"}
+                                "alarm_trigger_key": "TAvtid"},
+                     "DMpmax": {"display_name": "Peak ", "unit": "mL", "range": [0, 60],
+                                "low_alarm_key": "LApmax", "high_alarm_key": "HApmax", "alarm_set_key": "SApmax",
+                                "alarm_trigger_key": "TApmax"},
+                     "DMplat": {"display_name": "Peak ", "unit": "mBar", "range": [0, 60],
+                                "low_alarm_key": "LAplat", "high_alarm_key": "HAplat", "alarm_set_key": "SAplat",
+                                "alarm_trigger_key": "TAplat"}
                      }
 
 # metainformation for user-set parameters
