@@ -22,6 +22,6 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
-    install_requires=["dash==1.12.0", "influxdb==5.3.0", "gunicorn==20.0.4",],
+    install_requires=["dash==2.15.0", "influxdb==5.3.0", "gunicorn==20.0.4",],
     include_package_data=True,
 )
